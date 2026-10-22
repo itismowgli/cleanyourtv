@@ -142,9 +142,9 @@ under the repo's 491,520-byte size gate. `tools/bench.py --keys 36 --series 3` o
 | Reference launcher (`main`) | 23 / 32 ms | 0.02% | 652 ms | 19 MB |
 | This branch | 23 / 32 ms | 0.7% (15 of 2,151) | 693 ms | 38 MB |
 
-The extra memory is mostly the full-colour wallpaper path and the type scale's font cache; an earlier
-version with 960x540 glow masks and xxhdpi banners used 41 MB and started in 905 ms, and both were taken
-back out. There are no new views on the hot path and no blur.
+Where the extra memory goes has not been traced yet. An earlier version with 960x540 glow masks and xxhdpi
+banners used 41 MB and started in 905 ms, so both were taken back out. There are no new views on the hot
+path and no blur.
 
 ## Tests
 
