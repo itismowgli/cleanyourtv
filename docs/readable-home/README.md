@@ -100,6 +100,15 @@ In the app library, cards and their focus frame share 16dp corners (they were 18
 outline, and the hint, count, names and status use the type scale (they were 11 to 15sp). The clock
 screensaver uses Inter and shows the date in sentence case at 22sp instead of spaced capitals.
 
+### Launcher settings
+
+The page keeps a short list: apps per row (4, 5, 6), rows below the dock (0, 1, 2), dock band opacity (100%,
+70%, 50%), the wallpaper picker (only when a theme has pictures), animations, and the reset, default home and
+TV settings rows. The extremes (7 per row, 3 rows, a 30% dock) and advanced effects stay theme keys. On the
+right a block sketch of Home (`SettingsPreview`) draws the layout with the launcher's own tile sizing, and it
+shows the choice under focus before it is pressed. Choices look like the rest of the launcher: white with dark
+text when focused, a lighter fill when chosen, no outlines. No new strings.
+
 ### Backgrounds on a big screen
 
 The glow behind the apps is a 480x270 mask stretched 4x. A one-step grain is now added once when it is
