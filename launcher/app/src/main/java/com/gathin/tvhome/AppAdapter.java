@@ -337,15 +337,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (id != 0) {
             try {
                 Resources resources = pm.getResourcesForApplication(ri.activityInfo.applicationInfo);
-                // Ask for artwork at least as wide as the zoomed tile. A banner is 160dp wide, so at xhdpi it is
-                // 320px; a 176dp tile on a 2x screen is 352px, 373px focused, and an xhdpi banner would be
-                // stretched soft. Then the xxhdpi artwork is asked for (apps without it get their best), and
-                // TVs whose tiles fit the xhdpi banner keep the smaller bitmaps.
-                DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
-                float tilePx = DESIGN_W_DP * dm.density * FOCUS_SCALE;
-                int density = tilePx > 160f * DisplayMetrics.DENSITY_XHIGH / 160f
-                        ? Math.max(DisplayMetrics.DENSITY_XXHIGH, dm.densityDpi)
-                        : Math.max(DisplayMetrics.DENSITY_XHIGH, dm.densityDpi);
+                // Keep at least xhdpi detail rather than downsampling artwork before the focus zoom.
+                int density = Math.max(DisplayMetrics.DENSITY_XHIGH, ctx.getResources().getDisplayMetrics().densityDpi);
                 banner = resources.getDrawableForDensity(id, density, null);
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException ignored) {
             }
@@ -430,8 +423,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         h.card.setVisibility(View.VISIBLE);
         h.card.setFocusable(true);
         h.name.setText(e.name);
-        // The dock has no labels, unless always_show_names asks for them (DockDecoration then makes room in the band).
-        h.name.setVisibility(dockRow && position < dockSize && restNameAlpha == 0f ? View.INVISIBLE : View.VISIBLE);
+        // The dock has no labels while the big title above it names the focused app; otherwise a dock tile shows
+        // its name when focused, like the grid (DockDecoration then makes room in the band).
+        h.name.setVisibility(dockRow && position < dockSize && restNameAlpha == 0f && dockTitle ? View.INVISIBLE : View.VISIBLE);
         boolean focused = h.card.isFocused();   // a rebind after reload() can hit the focused tile
         h.name.setAlpha(focused ? 1f : restNameAlpha);
         h.name.setSelected(focused);   // a focused name too long for the tile scrolls once (marquee), as on Android TV

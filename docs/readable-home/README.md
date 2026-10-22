@@ -39,9 +39,9 @@ set where they are used.
 | `text_title` | 20 | the time in the top bar, section titles |
 | `text_headline` | 22 | dialog and library titles, the screensaver date |
 
-Text is brighter, 70 to 100% white instead of 55 to 65%. Every tile has its name underneath, dimmed until
-the tile is focused (`always_show_names`), so nobody has to recognise an app by its artwork alone. Names
-scale with the tile at 6 or 8 columns and never go below 13sp. A focused name too long for its tile, such as
+Text is brighter, 70 to 100% white instead of 55 to 65%. The focused tile shows its name underneath, in
+the dock too now that the big title above the dock is off; `always_show_names` still shows every name.
+Names scale with the tile at 6 or 8 columns and never go below 13sp. A focused name too long for its tile, such as
 a module card's "Weather · Forecast …", scrolls once, as on Android TV.
 
 ### One spacing system (8dp grid)
@@ -66,7 +66,7 @@ lines.
 
 The old highlight was a frosted panel drawn over the focused tile, and it washed the tile out. The new one
 is a 4dp glass band around the tile: brightest at the top, with a highlight on its outer edge, a faint sheen
-over the top 40% of the tile only, and a soft dark line outside so it still shows on white tiles. It overlaps
+over the top 40% of the tile only, and a slight glow fading out over 10dp around it. It overlaps
 the tile by 1dp so sub-pixel placement can't open a seam, and its corners are concentric with the tile's. It
 is drawn once into the existing hardware layer, so moving it costs the same as before. There is no blur:
 Android 9 has no live blur, and the repo rules exclude it anyway.
@@ -83,8 +83,8 @@ The clock block was about three times the height of the buttons. It is now 48dp:
 `Thursday, 22 Oct | Good afternoon` on line 2 (baseline-aligned; the divider is a glyph in the same font),
 with the 36dp buttons centred on it.
 
-The big app name above the dock is off (`dock_title`), and the dock sits one 32dp gap under the top bar
-instead of at the bottom of the screen, so a full second row of apps shows on Home.
+The big app name above the dock is off (`dock_title`), and the dock sits 48dp under the top bar instead of
+at the bottom of the screen, so a full second row of apps shows on Home.
 
 Rows scrolling up are still cut at the grid's edge, as in the reference launcher. A fading edge there was
 tried and measured with `tools/bench.py --keys 36 --series 3`: janky frames went from 1 in 2,819 (0.04%) to
@@ -102,16 +102,14 @@ screensaver uses Inter and shows the date in sentence case at 22sp instead of sp
 
 ### Backgrounds on a big screen
 
-The glow behind the apps was a 480x270 mask stretched 4x. It is now 960x540, with a one-step grain added
-once when it is built, so an 8-bit panel shows a smooth fade instead of flat bands. The average flat run
-along a row went from 18px to 4px. The cinematic shelf's scrim gets the same treatment.
+The glow behind the apps is a 480x270 mask stretched 4x. A one-step grain is now added once when it is
+built, so an 8-bit panel shows a fade instead of flat bands: the average flat run along a row went from 18px
+to 7px. (A 960x540 mask got it to 4px, but cost memory and start-up time, so the mask stays at 480x270.)
+The cinematic shelf's scrim gets the same grain.
 
 Wallpapers are decoded in full colour on TVs with 1.5 GB of RAM or more, because 16-bit colour turned dark
 gradients into steps. On the Aurora wallpaper the widest flat band went from 127-176px to 12-31px. Low-RAM
 TVs keep 16-bit unless a theme sets `wallpaper_true_color`.
-
-App banners are requested at xxhdpi when the zoomed tile is wider than an xhdpi banner (373px against 320px
-on a 1080p TV). Apps that ship sharper artwork get it; others get their best, as before.
 
 ### Themes, switches and add-ons
 
@@ -136,10 +134,17 @@ name when focus moves on.
 
 ## Size and performance
 
-The release APK is 481,163 bytes, against 481,243 for the reference launcher at the same upstream commit
-(80 bytes smaller) and under the repo's 491,520-byte size gate. There are no new views on the hot path, no
-blur and no added animation. The focus frame draws fewer primitives than the old glass (no fill, no 12 glow
-rings), and the header change only rearranges existing text views.
+The release APK is 481,119 bytes, against 481,243 for the reference launcher at the same upstream commit,
+under the repo's 491,520-byte size gate. `tools/bench.py --keys 36 --series 3` on the TV:
+
+| | Key response p50 / p95 | Janky frames | Cold start | Memory (PSS) |
+|---|---|---|---|---|
+| Reference launcher (`main`) | 23 / 32 ms | 0.02% | 652 ms | 19 MB |
+| This branch | 23 / 32 ms | 0.7% (15 of 2,151) | 693 ms | 38 MB |
+
+The extra memory is mostly the full-colour wallpaper path and the type scale's font cache; an earlier
+version with 960x540 glow masks and xxhdpi banners used 41 MB and started in 905 ms, and both were taken
+back out. There are no new views on the hot path and no blur.
 
 ## Tests
 

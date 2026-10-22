@@ -74,9 +74,9 @@ A home screen that looks like an Apple TV and gets out of the way:
 | Part | What it looks like |
 |---|---|
 | **A pitch-black home** | A dock of your four favourite apps in a rounded band, where Apple TV puts it. |
-| **Names under every tile** | In large type, dimmed until the tile is focused, over an ambient glow in a colour taken from the focused app's artwork. The big name above the dock is still there with `dock_title`. |
+| **The focused app's name** | Under its tile, over an ambient glow in a colour taken from its artwork. `always_show_names` names every tile; `dock_title` brings back the big name above the dock. |
 | **The rest of your apps in a grid** | Slides up when you press Down. |
-| **One glass focus frame** | Glides from tile to tile around the focused tile, which grows 6%. A name too long for its tile scrolls once. |
+| **One glass focus frame** | With a slight glow, glides from tile to tile around the focused tile, which grows 6%. A name too long for its tile scrolls once. |
 | **Three buttons** | Inputs (HDMI ports under the names you gave them in the TV's settings, AV, Live TV), Wi-Fi or Ethernet with the network name, Settings. |
 | **The time, the date and a greeting** | On two lines as tall as the buttons, in [Inter](https://rsms.me/inter/), and a matching Clock screensaver. Set `show_stats` in config or a theme for one line under the clock: CPU, free memory and free storage. It stays off unless you turn it on, and it refreshes only while Home is on screen. |
 | **Themes and module cards** | Themes change colours, wallpaper, dock and columns without a rebuild, and module cards let other apps plug a tile in, only with your say-so. |
@@ -86,8 +86,8 @@ phoning home, no apps you never asked for.
 
 | | |
 |---|---|
-| ![Home: the dock with names under every tile and the glass frame on the focused app](docs/focus-2-up-netflix.png) | ![The Inputs popup: HDMI ports with what is connected, AV and Live TV](docs/inputs-menu.jpg) |
-| *Home: names under the tiles, the glass frame, the glow* | *Inputs: HDMI with connection state, AV, Live TV* |
+| ![Home: the dock with the glass frame and the name on the focused app](docs/focus-2-up-netflix.png) | ![The Inputs popup: HDMI ports with what is connected, AV and Live TV](docs/inputs-menu.jpg) |
+| *Home: the glass frame, the focused app's name, the glow* | *Inputs: HDMI with connection state, AV, Live TV* |
 | ![The grid with the glass frame on a tile and its name beneath](docs/focus-1-fancode.png) | ![The Clock screensaver: a thin clock drifting over the glow](docs/clock-screensaver.png) |
 | *The grid, one glass frame, the tile's name* | *Clock screensaver, drifts so nothing burns in* |
 | ![The aurora theme: a wallpaper and tinted pills, pushed without a rebuild](themes/aurora/screenshot.jpg) | ![Six columns and a six-app dock from a theme's config.json](themes/six-columns/screenshot.jpg) |

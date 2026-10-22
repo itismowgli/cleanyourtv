@@ -13,7 +13,7 @@ import android.view.View;
 /**
  * The focus frame: a 4dp band of glass around the focused tile. Android 9 has no live blur, so the glass is
  * drawn from light alone: one band, brightest at the top with a little light returning at the bottom, a crisp
- * highlight on its outer edge, a faint sheen over the top 40% of the tile, and a soft dark line outside so it still reads over white tiles.
+ * highlight on its outer edge, a faint sheen over the top 40% of the tile, and a slight glow under it.
  * One instance floats over the grid and is moved with spring animations between tiles.
  */
 public class GlassView extends View {
@@ -21,7 +21,10 @@ public class GlassView extends View {
     private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint outerEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sheen = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint shadow = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
+    /** Room around the zoomed tile for the frame and its glow. MainActivity sizes the view with it. */
+    static final float PAD_DP = 14f;
+    private float inset;
     private final Path frame = new Path();
     private final RectF tile = new RectF();
     private final RectF outer = new RectF();
@@ -35,11 +38,10 @@ public class GlassView extends View {
         super(context, attrs);
         density = getResources().getDisplayMetrics().density;
         radius = 16f * density;
+        inset = PAD_DP * density;
+        glow.setStyle(Paint.Style.STROKE);
         outerEdge.setStyle(Paint.Style.STROKE);
         outerEdge.setStrokeWidth(1f * density);
-        shadow.setStyle(Paint.Style.STROKE);
-        shadow.setStrokeWidth(1.5f * density);
-        shadow.setColor(0x59000000);
         // Cached as a texture: the spring only changes translation, so the GPU moves the frame without
         // replaying the path and gradients on every frame.
         setLayerType(LAYER_TYPE_HARDWARE, null);
@@ -49,6 +51,12 @@ public class GlassView extends View {
     void setAccent(int argb) {
         tint = argb == 0 ? 0xFFFFFF : lighten(argb & 0xFFFFFF);
         rebuildShaders(getHeight());
+        invalidate();
+    }
+
+    /** Room between the view's edge and the tile; less room means less glow (the app library's shelf is tight). */
+    void setInset(float px) {
+        inset = px;
         invalidate();
     }
 
@@ -87,9 +95,9 @@ public class GlassView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // The view is the zoomed tile plus 6dp on each side (MainActivity): 4dp of glass, 1.5dp of shadow
-        // line, 0.5dp spare. Every corner is concentric with the tile's: outer radius = tile radius + 4dp.
-        float inset = 6f * density, glass = 4f * density, overlap = 1f * density;
+        // The view is the zoomed tile plus `inset` on each side: 4dp of glass, then a soft glow fading out over
+        // the rest. Every corner is concentric with the tile's: outer radius = tile radius + 4dp.
+        float glass = 4f * density, overlap = 1f * density;
         tile.set(inset, inset, getWidth() - inset, getHeight() - inset);
         outer.set(tile.left - glass, tile.top - glass, tile.right + glass, tile.bottom + glass);
         float ro = radius + glass;
@@ -98,8 +106,18 @@ public class GlassView extends View {
         inner.set(tile.left + overlap, tile.top + overlap, tile.right - overlap, tile.bottom - overlap);
         float ri = Math.max(0f, radius - overlap);
 
-        float s = shadow.getStrokeWidth() / 2f;
-        canvas.drawRoundRect(outer.left - s, outer.top - s, outer.right + s, outer.bottom + s, ro + s, ro + s, shadow);
+        // A slight glow under the frame: thin rings, each fainter, out to the view's edge. Drawn once into the
+        // hardware layer like the rest, so it costs nothing while the frame moves.
+        float room = inset - glass;
+        int rings = Math.max(1, Math.round(room / density));
+        float step = room / rings;
+        glow.setStrokeWidth(step + 0.5f);
+        for (int i = 0; i < rings; i++) {
+            float o = step * (i + 0.5f);
+            float t = 1f - (float) i / rings;
+            glow.setColor(Math.round(0x2E * t * t) << 24 | tint);
+            canvas.drawRoundRect(outer.left - o, outer.top - o, outer.right + o, outer.bottom + o, ro + o, ro + o, glow);
+        }
 
         // rewind() resets the fill type to WINDING, so set EVEN_ODD again each time; the inner rect also runs the
         // other way, which leaves the tile uncovered under either rule.

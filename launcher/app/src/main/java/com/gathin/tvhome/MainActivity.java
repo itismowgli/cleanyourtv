@@ -491,7 +491,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass));
+        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames || !cfg.dockTitle, cfg.dockOpacity, cfg.dockGlass));
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
         if (animations && !reducedMotion) {
             grid.setLayoutAnimation(new LayoutAnimationController(
@@ -522,10 +522,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));
-            // Slim top bar: the dock sits one 32dp gap under the buttons instead of at the bottom of the screen,
+            // Slim top bar: the dock sits 48dp (6 x 8) under the buttons instead of at the bottom of the screen,
             // and the rows below get the room that frees. Buttons end 6dp above the 48dp header block, so
-            // 32 = 6 + the grid's 10dp top margin + 16dp padding.
-            if (MainActivity.this.dockRow && !cfg.dockTitle && !cinematic) want = Math.max(shelfClearance, Math.min(want, (int) (16 * density)));
+            // 48 = 6 + the grid's 10dp top margin + 32dp padding.
+            if (MainActivity.this.dockRow && !cfg.dockTitle && !cinematic) want = Math.max(shelfClearance, Math.min(want, (int) (32 * density)));
             // No dock to push down: the grid starts at the top, with room for the first row's zoom and glass.
             if (!MainActivity.this.dockRow) want = (int) (AppAdapter.TOP_ROOM_DP * density);
             if (grid.getPaddingTop() != want) {
@@ -1432,7 +1432,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         Rect r = tileRect;
         r.set(0, 0, card.getWidth(), card.getHeight());
         root.offsetDescendantRectToMyCoords(card, r);
-        float pad = 6f * density;        // matches GlassView's glow inset
+        float pad = GlassView.PAD_DP * density;   // GlassView's room for the frame and its glow
         float scale = adapter.focusScale();
         float w = card.getWidth() * scale + 2 * pad;
         float h = card.getHeight() * scale + 2 * pad;
@@ -1504,7 +1504,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(pos);
         View card = vh == null ? null : vh.itemView.findViewById(R.id.card);
         if (card == null || card.getWidth() <= 0 || !card.isFocused()) return;
-        float pad = 6f * density;
+        float pad = GlassView.PAD_DP * density;
         float scale = adapter.focusScale();
         int w = (int) (card.getWidth() * scale + 2 * pad);
         int h = (int) (card.getHeight() * scale + 2 * pad);
@@ -1601,7 +1601,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * the grid stay readable over the artwork. One small bitmap stretched over the screen, like the glow.
      */
     private Drawable scrimDrawable() {
-        int w = 960, h = 540;   // half the screen and dithered, like the glow, so the dark gradient does not band
+        int w = 480, h = 270;   // with a grain, like the glow, so the dark gradient does not band
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
         boolean rtl = getResources().getBoolean(R.bool.rtl_menu_bar);
@@ -1727,10 +1727,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambientColor = color;
         BitmapDrawable glow = (BitmapDrawable) ambient.getBackground();
         if (glow == null) {
-            // 960x540, half the screen, and dithered: at 480x270 the few alpha steps of this faint gradient were
-            // stretched 4x into visible bands on a big screen. Built once; colour changes only re-tint it.
-            int w = 960;
-            int h = 540;
+            // A quarter of the screen, stretched: a faint gradient this size has few alpha steps, which a big
+            // screen shows as bands, so addGrain breaks them up. Built once; colour changes only re-tint it.
+            int w = 480;
+            int h = 270;
             Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bmp);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);

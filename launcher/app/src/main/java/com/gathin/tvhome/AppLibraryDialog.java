@@ -378,6 +378,7 @@ final class AppLibraryDialog {
         shelf.addView(list, new FrameLayout.LayoutParams(-1, -1));
         highlight = new GlassView(activity, null);
         highlight.setRadius(dp(16));   // same as the cards, so the frame's corners run parallel to theirs
+        highlight.setInset(dp(6));     // the shelf is tight: the frame plus a hint of glow
         highlight.setAlpha(0f);
         highlight.setFocusable(false);
         highlight.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
