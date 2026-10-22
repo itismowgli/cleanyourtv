@@ -56,6 +56,7 @@ a module card's "Weather · Forecast …", scrolls once, as on Android TV.
 | Dock corner, concentric | 16 + 24 | 40 |
 | Buttons | height 36, radius = height / 2 | 36 / 18 |
 | Inputs menu | rows 16 + padding 8 | 24 |
+| Icons (top bar, Quick settings, app library) | | 20 |
 
 Nested rounded shapes use concentric corners (outer radius = inner radius + the padding between them), so
 their curves run parallel. The top bar, the dock edge and the last button share the same left and right
@@ -84,6 +85,10 @@ with the 36dp buttons centred on it.
 
 The big app name above the dock is off (`dock_title`), and the dock sits one 32dp gap under the top bar
 instead of at the bottom of the screen, so a full second row of apps shows on Home.
+
+Rows scrolling up are still cut at the grid's edge, as in the reference launcher. A fading edge there was
+tried and measured with `tools/bench.py --keys 36 --series 3`: janky frames went from 1 in 2,819 (0.04%) to
+400 in 2,805 (14.3%) and the median key response from 23 to 31 ms, so it is not in this branch.
 
 ### Menus, library and screensaver
 
@@ -119,8 +124,9 @@ next row, names were cut off at 8 columns, and the slim top bar undercut the app
 dock.
 
 Module cards use the same contract as upstream. The Weather and Capacity Stats add-ons from `addons/` were
-built, installed and shown as cards on Home, then removed again. I did not see a long focused card name
-scroll on screen, because the card's caption had not loaded before the add-ons came off the TV.
+built, installed and shown as cards on Home, then removed again. A focused name too long for its tile was
+checked with a theme's `app_labels` giving Netflix a long name: it scrolls once and returns to the shortened
+name when focus moves on.
 
 ## Settings for this TV (`config.xml`)
 
@@ -130,8 +136,8 @@ scroll on screen, because the card's caption had not loaded before the add-ons c
 
 ## Size and performance
 
-The release APK is 480,979 bytes, against 481,243 for the reference launcher at the same upstream commit
-(264 bytes smaller) and under the repo's 491,520-byte size gate. There are no new views on the hot path, no
+The release APK is 481,163 bytes, against 481,243 for the reference launcher at the same upstream commit
+(80 bytes smaller) and under the repo's 491,520-byte size gate. There are no new views on the hot path, no
 blur and no added animation. The focus frame draws fewer primitives than the old glass (no fill, no 12 glow
 rings), and the header change only rearranges existing text views.
 
@@ -140,8 +146,8 @@ rings), and the header change only rearranges existing text views.
 `TileFitTest` pins the grid's geometry. Its screen numbers now follow this layout (a grid 1664px wide and
 900px tall at 1080p), the dock title reserves 88dp instead of 104dp, and the plain grid's check accepts
 tiles a little under the width limit but never under the floor. All launcher unit tests pass, lint reports
-no errors, and the Python suite passes except two `test_device_notes_index` cases that also fail on
-upstream `main`.
+no errors, and the Python suite passes. Two `test_device_notes_index` cases failed on macOS on upstream `main` too; the
+fix is on this branch and in upstream PR #924.
 
 ## Screenshots
 
@@ -150,11 +156,12 @@ painted over: the README's six (`docs/focus-2-up-netflix.png`, `docs/focus-1-fan
 `docs/inputs-menu.jpg`, `docs/clock-screensaver.png`, `docs/tile-move.jpg`, `docs/app-library.jpg`) and
 the six themes' `screenshot.jpg`, at the original 1280x720.
 
-## Not done
+## Hebrew
 
-- `layout-iw` (Hebrew) keeps the reference layout's header, with the new type scale and no letter spacing.
-- The icon size change (22 to 20dp) also applies in Quick settings and the app library, which share the
-  icons.
+`layout-iw` mirrors the new header: the 48dp block sits on the right with the time on line 1 (AM/PM to its
+left) and `date | greeting` reading right to left on line 2, and the buttons are centred on it. Android 9
+cannot switch one app's language from the shell, so it was checked on the TV with a build that used the
+Hebrew layout for every language.
 
 ## Build
 
