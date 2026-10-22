@@ -11,12 +11,13 @@ import android.view.View;
 
 /**
  * A block sketch of Home for Launcher settings: the top bar, the dock band and the rows under it, drawn with
- * the launcher's own geometry (AppAdapter.tileWidthPx) on a 960x540dp screen scaled to fit. It shows the
+ * the launcher's own geometry (AppAdapter.tileWidthPx) on this TV's screen size, scaled to fit. It shows the
  * setting under focus before it is chosen. Drawn only when a setting changes; nothing animates.
  */
 public class SettingsPreview extends View {
 
-    private static final float SCREEN_W = 960f, SCREEN_H = 540f;
+    /** The TV's own screen in dp (960x540 on 1080p and 4K sets, other sizes on others), sketched at scale. */
+    private final float SCREEN_W, SCREEN_H;
     /** Muted stand-ins for app banners, so the tiles read as different apps without looking like any one. */
     private static final int[] TILE_COLORS = {0xFFE8E8EA, 0xFF2F6FE0, 0xFFD8D8DC, 0xFF7A3FE0,
             0xFF2A2A2E, 0xFFB8C8E8, 0xFFC0287A, 0xFF5C5CF0};
@@ -33,6 +34,11 @@ public class SettingsPreview extends View {
     public SettingsPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
         ring.setStyle(Paint.Style.STROKE);
+        android.util.DisplayMetrics dm = new android.util.DisplayMetrics();
+        ((android.view.WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRealMetrics(dm);
+        float w = dm.widthPixels / dm.density, h = dm.heightPixels / dm.density;
+        SCREEN_W = Math.max(w, h);
+        SCREEN_H = Math.min(w, h);
     }
 
     void show(int columns, int rows, int dockOpacity, boolean animations, boolean wallpaper) {
@@ -101,10 +107,12 @@ public class SettingsPreview extends View {
         float cell = inner / columns;
         float left = 64;
 
-        // Dock band, 48dp under the top bar, 24dp around the tiles, room for the focused name.
-        float bandTop = 80 + 48;
+        // Dock band, 24dp around the tiles with room for the focused name: 48dp under the top bar when rows show
+        // below it, near the bottom of the screen when none do, as MainActivity places it.
+        float bandH = 24 + tileH + 8 + 24 + 16;
+        float bandTop = rows > 0 ? 80 + 48 : SCREEN_H - 50 - bandH;   // at 0 the next row peeks in below
         float tileTop = bandTop + 24;
-        float bandBottom = tileTop + tileH + 8 + 24 + 16;
+        float bandBottom = bandTop + bandH;
         fill.setColor(Math.round(dockOpacity * 2.55f) << 24 | 0x141416);
         r.set(56, bandTop, SCREEN_W - 56, bandBottom);
         canvas.drawRoundRect(r, tileR + 24, tileR + 24, fill);
