@@ -1,6 +1,7 @@
 > **This branch is Readable Home**, a restyle of the launcher for easy reading from the sofa: one typeface
 > (Inter) on a five-size type scale, an 8dp spacing grid with concentric corners, a glass focus frame and a
-> slim two-line top bar. Tested on a Xiaomi MiTV-AXSO2. The screenshots below are from this branch; what
+> slim two-line top bar, and a Launcher settings page with a live sketch of Home. Tested on a Xiaomi
+> MiTV-AXSO2. The screenshots below are from this branch. How to use it, what every setting does, and what
 > changed and why: [docs/readable-home](docs/readable-home/README.md). Everything else is upstream
 > [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv).
 
@@ -79,6 +80,7 @@ A home screen that looks like an Apple TV and gets out of the way:
 | **One glass focus frame** | With a slight glow, glides from tile to tile around the focused tile, which grows 6%. A name too long for its tile scrolls once. |
 | **Three buttons** | Inputs (HDMI ports under the names you gave them in the TV's settings, AV, Live TV), Wi-Fi or Ethernet with the network name, Settings. |
 | **The time, the date and a greeting** | On two lines as tall as the buttons, in [Inter](https://rsms.me/inter/), and a matching Clock screensaver. Set `show_stats` in config or a theme for one line under the clock: CPU, free memory and free storage. It stays off unless you turn it on, and it refreshes only while Home is on screen. |
+| **Launcher settings** | Hold OK on Settings, then Launcher settings: apps per row, rows below the dock, dock opacity and animations, with a sketch of Home that shows each choice before you make it. |
 | **Themes and module cards** | Themes change colours, wallpaper, dock and columns without a rebuild, and module cards let other apps plug a tile in, only with your say-so. |
 
 And a TV that stops working against you: no sponsored rows, no "Discover" nags, no analytics
@@ -94,6 +96,8 @@ phoning home, no apps you never asked for.
 | *Aurora theme, pushed with `tools/theme.sh`* | *Six columns and a six-app dock, same launcher* |
 | ![Reordering: a tile is picked up and the others dim](docs/tile-move.jpg) | ![The App library: installed apps, one press adds an app back to Home](docs/app-library.jpg) |
 | *Hold OK on Settings, Reorder apps: arrows carry the tile, Back puts it down* | *App library: one press puts a removed app back on Home* |
+| ![Launcher settings: the choices on the left, a sketch of Home on the right](docs/readable-home/settings/settings-columns-6.jpg) | ![Home with two rows of apps under the dock](docs/readable-home/settings/home-rows-2.jpg) |
+| *Launcher settings: the sketch shows the choice you are on* | *Rows below dock on 2, as the sketch showed* |
 
 ## Supported TVs
 

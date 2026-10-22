@@ -1,16 +1,96 @@
 # Readable Home
 
-A restyle of this repo's reference launcher for people of any age reading the TV from the sofa: larger and
-calmer type, one spacing system for everything on screen, a clearer focus frame and a slim top bar. Built
-and tested on a Xiaomi MiTV-AXSO2 (dangalUHD, Android TV 9, firmware PI.6432).
+A restyle of this repo's launcher for people of any age reading the TV from the sofa: larger and calmer type,
+one spacing system for everything on screen, a clear focus frame and a slim top bar. Everything else works as
+in the reference launcher: themes, module cards, the app library, the Inputs menu, the remote buttons.
+
+Built and tested on a Xiaomi MiTV-AXSO2 (dangalUHD, Android TV 9, firmware PI.6432). Every screenshot on this
+page was taken on that TV, with the Wi-Fi network name painted over.
 
 | Before (reference launcher) | After (Readable Home) |
 |---|---|
-| ![Before](before.jpg) | ![After](after.jpg) |
+| ![Home on the reference launcher](before.jpg) | ![Home on Readable Home](after.jpg) |
 
-The Wi-Fi network name is painted over in both screenshots.
+## What you see on Home
 
-## What changes, and why
+| Part | What it is | What the remote does |
+|---|---|---|
+| Top bar, left | The time, then the date and a greeting | Nothing to select |
+| Top bar, right | Inputs, the Wi-Fi network, Settings | Up from the dock. OK opens; hold OK on Settings for the launcher's own menu |
+| Dock | Your favourite apps in a dark band | Left and Right move between them, OK opens |
+| Grid | Every other app, in the same order as the app list | Down from the dock; Down and Up move a row at a time |
+| Focus frame | A white glass frame with a soft glow around the app you are on; its name appears underneath | Follows the arrows |
+
+Only the app you are on shows its name, so the screen stays quiet; set `always_show_names` in a theme to name
+every tile.
+
+## Install
+
+Same as the reference launcher. With the TV on the same network and network debugging on:
+
+```bash
+git clone -b readable-home https://github.com/itismowgli/cleanyourtv
+cd cleanyourtv
+TV_HOST=<tv ip> launcher/build-and-install.sh
+```
+
+Your dock and hidden apps go in `launcher/app/src/main/res/values/config.xml` before you build, or in a
+theme afterwards (`themes/README.md`).
+
+## Launcher settings
+
+Hold OK on **Settings** in the top bar, then choose **Launcher settings**. The page keeps to the choices that
+cannot make Home look broken. On the right, a sketch of Home shows the choice you are on before you press OK,
+so you can look before you change anything. **Follow theme** puts every choice back.
+
+![Launcher settings with the sketch of Home](settings/settings-default.jpg)
+
+### Apps per row
+
+How many apps sit in each row. More apps per row means smaller tiles. 4 suits most living rooms.
+
+| 4 | 5 | 6 |
+|---|---|---|
+| ![4 apps per row](settings/home-columns-4.jpg) | ![5 apps per row](settings/home-columns-5.jpg) | ![6 apps per row](settings/home-columns-6.jpg) |
+
+### Rows below dock
+
+How much of the app grid shows under the dock without pressing Down. 0 keeps the dock low with the screen
+calm above it; 1 lifts the dock under the top bar with a row of apps below; 2 makes the tiles a little smaller
+so two rows fit.
+
+| 0 | 1 | 2 |
+|---|---|---|
+| ![No rows below the dock](settings/home-rows-0.jpg) | ![One row below the dock](settings/home-rows-1.jpg) | ![Two rows below the dock](settings/home-rows-2.jpg) |
+
+### Dock band opacity
+
+How solid the dark band behind the dock is. It only makes a difference with a wallpaper, which shows through
+at 70% and 50% (these three use the Aurora theme's wallpaper).
+
+| 100% | 70% | 50% |
+|---|---|---|
+| ![Solid dock band](settings/home-dock-100.jpg) | ![Dock band at 70%](settings/home-dock-70.jpg) | ![Dock band at 50%](settings/home-dock-50.jpg) |
+
+### Animations
+
+On by default: the focus frame glides and the focused tile grows a little. Off, both jump straight to the
+next app, which helps on slow TVs. Home looks the same either way when nothing is moving, so there is no
+picture for this one.
+
+### The sketch follows your choice
+
+| Apps per row on 6 | Rows below dock on 2 | Dock band on 50% |
+|---|---|---|
+| ![Sketch with 6 apps per row](settings/settings-columns-6.jpg) | ![Sketch with 2 rows below the dock](settings/settings-rows-2.jpg) | ![Sketch with the dock band at 50%](settings/settings-dock-50.jpg) |
+
+### Not on this page
+
+Seven apps per row, three rows, a 30% dock band and advanced effects still work, from a theme's
+`config.json` (keys in `themes/README.md`). They are left off the page because they are easy to get wrong
+from the sofa.
+
+## What changed, and why (for contributors)
 
 ### Type
 
@@ -138,8 +218,8 @@ name when focus moves on.
 ## Settings for this TV (`config.xml`)
 
 `dock_apps` (Netflix, YouTube, Prime Video, JioHotstar), `live_tv_package` and `hidden_apps` set to
-`com.android.tv` as `examples/xiaomi-mitv-axso2` says, `rows_below_dock` 1, `dock_title` false,
-`always_show_names` true and `focus_overshoot` false. Change them for your own set.
+`com.android.tv` as `examples/xiaomi-mitv-axso2` says, `rows_below_dock` 0, `dock_title` false,
+`always_show_names` false and `focus_overshoot` false. Change them for your own set.
 
 ## Size and performance
 
@@ -165,10 +245,11 @@ fix is on this branch and in upstream PR #924.
 
 ## Screenshots
 
-Every launcher screenshot on this branch is new, taken on the Xiaomi MiTV-AXSO2 with the Wi-Fi network name
-painted over: the README's six (`docs/focus-2-up-netflix.png`, `docs/focus-1-fancode.png`,
-`docs/inputs-menu.jpg`, `docs/clock-screensaver.png`, `docs/tile-move.jpg`, `docs/app-library.jpg`) and
-the six themes' `screenshot.jpg`, at the original 1280x720.
+Every screenshot is new, taken on the Xiaomi MiTV-AXSO2 with this build and the Wi-Fi network name painted
+over: the README's six (`docs/focus-2-up-netflix.png`, `docs/focus-1-fancode.png`, `docs/inputs-menu.jpg`,
+`docs/clock-screensaver.png`, `docs/tile-move.jpg`, `docs/app-library.jpg`), the six themes'
+`screenshot.jpg` at 1280x720, and the settings set in `settings/`, each pushed as a one-key theme so the value
+shown is exact.
 
 ## Hebrew
 
@@ -176,7 +257,3 @@ the six themes' `screenshot.jpg`, at the original 1280x720.
 left) and `date | greeting` reading right to left on line 2, and the buttons are centred on it. Android 9
 cannot switch one app's language from the shell, so it was checked on the TV with a build that used the
 Hebrew layout for every language.
-
-## Build
-
-Same as the reference launcher: `TV_HOST=<tv ip> launcher/build-and-install.sh`.
