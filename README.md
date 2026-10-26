@@ -91,7 +91,7 @@ welcome as issues.
 </p>
 
 <p align="center">
-  <a href="https://trendshift.io/repositories/310225"><img src="docs/trending-badge.png" alt="#1 trending repo of the week, via trendshift.io" width="360"></a>
+  <a href="https://trendshift.io/repositories/310225"><img src="docs/trending-badge.png" alt="#1 trending repo of the week, Oct 19–25 2026, via trendshift.io" width="360"></a>
 </p>
 
 <p align="center">
