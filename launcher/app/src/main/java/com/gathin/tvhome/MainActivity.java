@@ -1972,11 +1972,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         null,
                         Shader.TileMode.CLAMP));
             } else {
-                paint.setShader(new RadialGradient(
-                        w * 0.32f, h * 0.42f, w * 0.62f,
-                        new int[]{0x5CFFFFFF, 0x26FFFFFF, 0x00FFFFFF},
-                        new float[]{0f, 0.45f, 1f},
-                        Shader.TileMode.CLAMP));
+                // Readable Home: the focused app's colour as light on the wall behind the TV. A wide ellipse
+                // centred low behind the dock, spanning the screen, at full strength there and gone before the
+                // clock and date, so the header stays crisp. It stays still; only its colour changes.
+                RadialGradient wash = new RadialGradient(
+                        w * 0.5f, h * 0.78f, h * 0.62f,
+                        new int[]{0x8CFFFFFF, 0x4DFFFFFF, 0x1AFFFFFF, 0x00FFFFFF},
+                        new float[]{0f, 0.35f, 0.7f, 1f},
+                        Shader.TileMode.CLAMP);
+                android.graphics.Matrix wide = new android.graphics.Matrix();
+                wide.setScale(1.38f, 1f, w * 0.5f, h * 0.78f);   // a soft ellipse that fades to nothing inside the bitmap, so no edge shows when it slides
+                wash.setLocalMatrix(wide);
+                paint.setShader(wash);
             }
             canvas.drawRect(0, 0, w, h, paint);
             addGrain(bmp);
@@ -2033,11 +2040,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             ambient.animate().alpha(1f).setDuration(300).start();
             return;
         }
-        // The same dip-and-swap as the dock's top shelf.
-        ambient.animate().alpha(0.35f).setDuration(ambient.getAlpha() > 0.35f ? 200 : 0).withEndAction(() -> {
-            setAmbient(color);
-            ambient.animate().alpha(1f).setDuration(500).start();
-        }).start();
+        // A smooth colour cross-fade, like the dock: no dip in brightness between apps, so the background
+        // never seems to pulse or shift.
+        transitionAmbient(color);
     }
 
     private void hideHero() {

@@ -189,6 +189,15 @@ right a block sketch of Home (`SettingsPreview`) draws the layout with the launc
 shows the choice under focus before it is pressed. Choices look like the rest of the launcher: white with dark
 text when focused, a lighter fill when chosen, no outlines. No new strings.
 
+### The app's colour behind Home
+
+The focused app's own colour lights the background, like a lamp behind the TV: a wide, soft ellipse centred low
+behind the dock, strongest there and gone before the clock and date, so the header stays crisp. It stays
+still and cross-fades between apps (no dip in brightness, no sliding). The colour is the app's brand colour:
+every pixel of a small copy of its artwork is grouped by hue, the hue that covers the most of the artwork
+wins, and the real pixels in that group are averaged. It is kept as found, only lifted when very dark;
+artwork with no colour (black, white, grey) gets a soft neutral light. It is worked out once per app.
+
 ### Backgrounds on a big screen
 
 The glow behind the apps is a 480x270 mask stretched 4x. A one-step grain is now added once when it is
