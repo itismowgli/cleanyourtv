@@ -2,8 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # readable-home: the Readable Home fork's default branch, checked like main.
+    branches: [main, readable-home]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
