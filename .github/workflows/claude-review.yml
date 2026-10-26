@@ -19,7 +19,12 @@ permissions:
   issues: write
 
 concurrency:
-  group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
+  # One review per PR at a time. Every other comment (a bot's, a person's) gets a group of its own, so it can
+  # never cancel a review that is running.
+  group: >-
+    claude-review-${{ github.event.pull_request.number || github.event.issue.number }}-${{
+    (github.event_name == 'issue_comment' && !startsWith(github.event.comment.body, '@claude review'))
+    && github.run_id || 'review' }}
   cancel-in-progress: true
 
 jobs:
