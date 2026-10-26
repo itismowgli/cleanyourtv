@@ -255,12 +255,16 @@ with `tools/bench.py --keys 36 --series 3` and, for the cold start, ten `am star
 | Back to Home, p50 | 57 ms | 58 ms |
 | Launcher CPU when idle | 0.1% | 0.1% |
 | Memory (PSS) at the end of the benchmark | 22 MB | 24 MB |
-| Memory (PSS) just after a fresh start, median of 5 | 34 MB | 19 MB |
 
 The grain that keeps the glow from banding (see Backgrounds on a big screen) took 45 ms on the main thread at
 start-up, the whole gap to the reference launcher. It is now added on a background thread: the glow shows at
 once and the grained copy replaces it a moment later, a change of one alpha step that cannot be seen. That
 took the cold start from 735 to 704 ms.
+
+Inter itself costs about 40 ms of cold start and 1.5 MB: with the TV's own font (Roboto on this set) Home
+started in 673 ms against 713 ms and used 18.8 MB against 20.3 MB, and the APK was 58 KB smaller. Inter stays,
+because it is wider and taller than Roboto at the same size, and the same on every TV. A memory reading taken
+just after an install can jump by over 10 MB from one run to the next, so these are steady readings.
 
 `bench.py` reported a few returns to Home over a second. In ten further runs on the same TV they took 52 to
 67 ms: the slow ones came while the Settings app the benchmark switches from was being restarted.

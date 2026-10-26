@@ -47,9 +47,10 @@ Speed, measured with `tools/bench.py --keys 36 --series 3` on the same TV (Xiaom
 | Launcher CPU when idle | 0.1% | 0.1% |
 | APK size | 535,561 bytes | 535,221 bytes |
 
-So focus moves settle about a third faster with no dropped frames, and the rest is level. Memory depends on what
-has been on screen: 22 against 24 MB at the end of the benchmark, 34 against 19 MB just after a fresh start.
-These numbers come from one TV; results from other TVs are welcome.
+So focus moves settle about a third faster with no dropped frames, and the rest is level. Memory is 22 against
+24 MB at the end of the benchmark; about 1.5 MB of the difference is the Inter font, which keeps text the same
+on every TV instead of using whatever font the TV maker installed. These numbers come from one TV; results from
+other TVs are welcome.
 
 ### Install in three steps
 
