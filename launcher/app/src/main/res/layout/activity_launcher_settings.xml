@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Launcher settings: a short list of choices on the left and, on the right, a sketch of Home that shows the
-     choice under focus before it is made (SettingsPreview). Same 56dp content edge as Home. The page is a dark
-     layer over Home (a translucent activity), so Home stays visible, dimmed, behind it. -->
+     choice under focus before it is made (SettingsPreview). Same 56dp content edge as Home. The page is solid,
+     with Home's own background: black and the soft glow in the colour of the app that was in focus. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EB0E1014"
+    android:background="#FF000000"
     android:orientation="horizontal"
     android:paddingStart="56dp"
     android:paddingEnd="56dp"

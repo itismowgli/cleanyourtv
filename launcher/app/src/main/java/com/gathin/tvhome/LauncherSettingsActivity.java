@@ -27,6 +27,8 @@ public final class LauncherSettingsActivity extends Activity {
     }
 
     static final String EXTRA_REORDER = "com.gathin.tvhome.extra.REORDER_FROM_SETTINGS";
+    /** The glow colour on Home when the page was opened (0: none), so the page has Home's background. */
+    static final String EXTRA_GLOW = "com.gathin.tvhome.extra.GLOW";
     private SharedPreferences choices;
     // A short list on purpose: the extremes (7 columns, 3 rows, a 30% dock) and advanced effects stay theme keys.
     private final TextView[] columnChoices = new TextView[3];
@@ -49,6 +51,18 @@ public final class LauncherSettingsActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_launcher_settings);
+        int glow = getIntent().getIntExtra(EXTRA_GLOW, 0);
+        if (glow != 0) {
+            // Home's background: black with a soft wash of the app's colour rising from the bottom centre.
+            android.graphics.drawable.GradientDrawable wash = new android.graphics.drawable.GradientDrawable();
+            wash.setGradientType(android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
+            wash.setColors(new int[]{(glow & 0xFFFFFF) | 0x8C000000, (glow & 0xFFFFFF) | 0x33000000, 0x00000000});
+            wash.setGradientCenter(0.5f, 1f);
+            wash.setGradientRadius(getResources().getDisplayMetrics().widthPixels * 0.62f);
+            android.graphics.drawable.LayerDrawable bg = new android.graphics.drawable.LayerDrawable(
+                    new android.graphics.drawable.Drawable[]{new android.graphics.drawable.ColorDrawable(0xFF000000), wash});
+            ((View) findViewById(R.id.preview).getParent()).setBackground(bg);
+        }
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         Config config = Config.load(this);
         View reorderChoice = findViewById(R.id.reorderChoice);

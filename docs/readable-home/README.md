@@ -205,8 +205,9 @@ the most (from 0.4% of the artwork, so a small logo on black counts) wins, and i
 the banner has no colour at all, the app's icon is tried. The colour is kept as found and only lifted when very
 dark; artwork with no colour anywhere gets a soft neutral light. It is worked out once per app.
 
-Launcher settings opens as a dark layer over Home (92%), so Home stays a faint presence behind the page, and
-every choice has a solid fill so nothing shows through it.
+Launcher settings is a solid page with Home's own background: black, with the same soft glow in the colour of
+the app that was in focus. Every choice has a solid fill. The glow also stays on while focus is in the top bar,
+and moving along the dock cross-fades it from one colour to the next instead of dimming it in between.
 
 ### Backgrounds on a big screen
 
