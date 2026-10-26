@@ -220,6 +220,20 @@
                     android:orientation="horizontal"
                     android:baselineAligned="true">
 
+                    <!-- Lunar date, shown when lunar_date is on: after the greeting, reading right to left. -->
+                    <TextView
+                        android:id="@+id/lunarDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:singleLine="true"
+                        android:textDirection="rtl"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="@dimen/text_label"
+                        android:fontFamily="@string/font_regular"
+                        android:includeFontPadding="true"
+                        android:visibility="gone" />
+
                     <!-- Shamsi date, shown when shamsi_date is on: after the greeting on line 2. -->
                     <TextView
                         android:id="@+id/shamsiDate"
@@ -248,6 +262,7 @@
                         android:textAllCaps="false" />
 
                     <TextView
+                        android:id="@+id/clockDivider"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -328,6 +343,14 @@
                     style="@style/TopButtonIcon"
                     android:contentDescription="@string/reorder"
                     android:drawableStart="@drawable/ic_swap_vert"
+                    android:nextFocusDown="@+id/grid" />
+
+                <TextView
+                    android:id="@+id/btnVpn"
+                    style="@style/TopButton"
+                    android:visibility="gone"
+                    android:singleLine="true"
+                    android:text="@string/vpn"
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView

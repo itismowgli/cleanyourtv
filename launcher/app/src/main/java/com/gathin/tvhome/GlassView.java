@@ -14,6 +14,7 @@ import android.view.View;
  * The focus frame: a 4dp band of glass around the focused tile. Android 9 has no live blur, so the glass is
  * drawn from light alone: one band, brightest at the top with a little light returning at the bottom, a crisp
  * highlight on its outer edge, a faint sheen over the top 40% of the tile, and a slight glow under it.
+ * A theme's glass_style rim keeps only a crisp 2dp ring around the tile; halo adds the soft glow to that ring.
  * One instance floats over the grid and is moved with spring animations between tiles.
  */
 public class GlassView extends View {
@@ -22,6 +23,7 @@ public class GlassView extends View {
     private final Paint outerEdge = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sheen = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint ring = new Paint(Paint.ANTI_ALIAS_FLAG);
     /** Room around the zoomed tile for the frame and its glow. MainActivity sizes the view with it. */
     static final float PAD_DP = 14f;
     private float inset;
@@ -33,6 +35,9 @@ public class GlassView extends View {
     private float radius;
     /** Glass tint as 0xRRGGBB: white normally, a festival's accent (diya gold) while a festive skin is on. */
     private int tint = 0xFFFFFF;
+    /** glass_style rim or halo: no band and no sheen, only the crisp ring (and, for halo, the glow). */
+    private boolean flat;
+    private boolean halo;
 
     public GlassView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,6 +45,8 @@ public class GlassView extends View {
         radius = 16f * density;
         inset = PAD_DP * density;
         glow.setStyle(Paint.Style.STROKE);
+        ring.setStyle(Paint.Style.STROKE);
+        ring.setStrokeWidth(2f * density);
         outerEdge.setStyle(Paint.Style.STROKE);
         outerEdge.setStrokeWidth(1f * density);
         // Cached as a texture: the spring only changes translation, so the GPU moves the frame without
@@ -51,6 +58,13 @@ public class GlassView extends View {
     void setAccent(int argb) {
         tint = argb == 0 ? 0xFFFFFF : lighten(argb & 0xFFFFFF);
         rebuildShaders(getHeight());
+        invalidate();
+    }
+
+    /** One of Config's GLASS_* styles. */
+    void setStyle(String style) {
+        flat = Config.GLASS_RIM.equals(style) || Config.GLASS_HALO.equals(style);
+        halo = Config.GLASS_HALO.equals(style);
         invalidate();
     }
 
@@ -106,18 +120,18 @@ public class GlassView extends View {
         inner.set(tile.left + overlap, tile.top + overlap, tile.right - overlap, tile.bottom - overlap);
         float ri = Math.max(0f, radius - overlap);
 
-        // A slight glow under the frame: thin rings, each fainter, out to the view's edge. Drawn once into the
-        // hardware layer like the rest, so it costs nothing while the frame moves.
-        float room = inset - glass;
-        int rings = Math.max(1, Math.round(room / density));
-        float step = room / rings;
-        glow.setStrokeWidth(step + 0.5f);
-        for (int i = 0; i < rings; i++) {
-            float o = step * (i + 0.5f);
-            float t = 1f - (float) i / rings;
-            glow.setColor(Math.round(0x2E * t * t) << 24 | tint);
-            canvas.drawRoundRect(outer.left - o, outer.top - o, outer.right + o, outer.bottom + o, ro + o, ro + o, glow);
+        // A slight glow under the frame, drawn once into the hardware layer, so it costs nothing while the frame
+        // moves (drawGlow).
+        if (flat) {
+            // rim / halo: a 2dp ring 2dp outside the tile, concentric with it, plus the glow for halo.
+            float g = 2f * density, w = 2f * density, o0 = g + w / 2f;
+            if (halo) drawGlow(canvas, tile.left - g - w, tile.top - g - w, tile.right + g + w, tile.bottom + g + w,
+                    radius + g + w, inset - g - w, 0x20);
+            ring.setColor(c(0xF2));
+            canvas.drawRoundRect(tile.left - o0, tile.top - o0, tile.right + o0, tile.bottom + o0, radius + o0, radius + o0, ring);
+            return;
         }
+        drawGlow(canvas, outer.left, outer.top, outer.right, outer.bottom, ro, inset - glass, 0x2E);
 
         // rewind() resets the fill type to WINDING, so set EVEN_ODD again each time; the inner rect also runs the
         // other way, which leaves the tile uncovered under either rule.
@@ -135,5 +149,19 @@ public class GlassView extends View {
 
         float e = outerEdge.getStrokeWidth() / 2f;
         canvas.drawRoundRect(outer.left + e, outer.top + e, outer.right - e, outer.bottom - e, ro - e, ro - e, outerEdge);
+    }
+
+    /** Thin rings, each fainter, from the given edge out over `room`. Drawn once into the hardware layer. */
+    private void drawGlow(Canvas canvas, float l, float t, float r, float b, float rad, float room, int alpha) {
+        if (room <= 0) return;
+        int rings = Math.max(1, Math.round(room / density));
+        float step = room / rings;
+        glow.setStrokeWidth(step + 0.5f);
+        for (int i = 0; i < rings; i++) {
+            float o = step * (i + 0.5f);
+            float k = 1f - (float) i / rings;
+            glow.setColor(Math.round(alpha * k * k) << 24 | tint);
+            canvas.drawRoundRect(l - o, t - o, r + o, b + o, rad + o, rad + o, glow);
+        }
     }
 }

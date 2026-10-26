@@ -88,6 +88,12 @@
                 android:layout_marginTop="8dp" />
 
             <TextView
+                android:id="@+id/openOnStartChoice"
+                style="@style/SettingsRow"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/followThemeChoice"
                 style="@style/SettingsRow"
                 android:layout_marginTop="24dp"
