@@ -1,15 +1,14 @@
-# Claude reviews pull requests to this fork, against the rules in AGENTS.md (CLAUDE.md imports it).
+# Claude reviews a pull request to this fork when the owner asks: comment "@claude review" on it.
 #
-# - A PR from a branch of this repo is reviewed when it opens. A PR from someone else's fork is not: GitHub
-#   keeps secrets from those runs. Comment "@claude review" on it instead (owner and collaborators only).
-# - "@claude review" also asks for a fresh review after new pushes.
+# - Codex reviews every pull request on its own, using AGENTS.md and launcher/AGENTS.md, at no cost here.
+#   This review is the deeper second look, so it runs only on request and uses the Claude plan only then.
+# - Works for pull requests from other forks too: a comment runs in this repo, with its secrets.
+# - Only the owner, members and collaborators can start it.
 # - Review only: Claude can read the PR and comment, never push, approve, merge or close.
 # - Runs on your Claude subscription: add CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`) as a repo secret.
 name: Claude review
 
 on:
-  pull_request:
-    types: [opened, ready_for_review, reopened]
   issue_comment:
     types: [created]
 
@@ -22,19 +21,16 @@ concurrency:
   # One review per PR at a time. Every other comment (a bot's, a person's) gets a group of its own, so it can
   # never cancel a review that is running.
   group: >-
-    claude-review-${{ github.event.pull_request.number || github.event.issue.number }}-${{
-    (github.event_name == 'issue_comment' && !startsWith(github.event.comment.body, '@claude review'))
-    && github.run_id || 'review' }}
+    claude-review-${{ github.event.issue.number }}-${{
+    !startsWith(github.event.comment.body, '@claude review') && github.run_id || 'review' }}
   cancel-in-progress: true
 
 jobs:
   review:
     if: >-
-      (github.event_name == 'pull_request' && !github.event.pull_request.draft &&
-       github.event.pull_request.head.repo.full_name == github.repository) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
-       startsWith(github.event.comment.body, '@claude review') &&
-       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '@claude review') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -49,10 +45,12 @@ jobs:
           use_sticky_comment: true
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+            PR NUMBER: ${{ github.event.issue.number }}
 
             Review this pull request to Readable Home, a fork of CleanYourTV whose launcher is restyled for
-            reading from the sofa. Read AGENTS.md and docs/readable-home/README.md first; they are the rules.
+            reading from the sofa. Read AGENTS.md, launcher/AGENTS.md and docs/readable-home/README.md first;
+            they are the rules. Codex has usually reviewed the PR already: read its comments and do not repeat
+            them; look for what it missed.
             Read the PR with `gh pr view` and `gh pr diff`.
 
             Check, in this order, and only report what is actually wrong:
