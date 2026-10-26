@@ -4,9 +4,12 @@
 [CleanYourTV](https://github.com/Gathin23/cleanyourtv), which takes the ads and bloat off an Android TV or
 Google TV. Readable Home keeps all of that and restyles the home screen so it is calm, large and clear.
 
-| Before | After |
+| CleanYourTV launcher 3.0 | Readable Home |
 |---|---|
-| ![The reference launcher](docs/readable-home/before.jpg) | ![Readable Home](docs/readable-home/after.jpg) |
+| ![Netflix in focus on CleanYourTV's launcher](docs/readable-home/before.jpg) | ![Netflix in focus on Readable Home](docs/readable-home/after.jpg) |
+| ![Prime Video in focus on CleanYourTV's launcher](docs/readable-home/before-prime.jpg) | ![Prime Video in focus on Readable Home](docs/readable-home/after-prime.jpg) |
+
+*Both launchers on the same TV, a minute apart, with the same app in focus.*
 
 **Who it helps:** parents and grandparents, anyone with tired or weaker eyes, and anyone who would rather
 not squint at small spaced-out capitals across a room.

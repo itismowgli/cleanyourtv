@@ -7,9 +7,10 @@ in the reference launcher: themes, module cards, the app library, the Inputs men
 Built and tested on a Xiaomi MiTV-AXSO2 (dangalUHD, Android TV 9, firmware PI.6432). Every screenshot on this
 page was taken on that TV, with the Wi-Fi network name painted over.
 
-| Before (reference launcher) | After (Readable Home) |
+| Before (reference launcher 3.0) | After (Readable Home) |
 |---|---|
-| ![Home on the reference launcher](before.jpg) | ![Home on Readable Home](after.jpg) |
+| ![Netflix in focus on the reference launcher](before.jpg) | ![Netflix in focus on Readable Home](after.jpg) |
+| ![Prime Video in focus on the reference launcher](before-prime.jpg) | ![Prime Video in focus on Readable Home](after-prime.jpg) |
 
 ## What you see on Home
 
