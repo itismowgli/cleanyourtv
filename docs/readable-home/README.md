@@ -191,12 +191,22 @@ text when focused, a lighter fill when chosen, no outlines. No new strings.
 
 ### The app's colour behind Home
 
-The focused app's own colour lights the background, like a lamp behind the TV: a wide, soft ellipse centred low
-behind the dock, strongest there and gone before the clock and date, so the header stays crisp. It stays
-still and cross-fades between apps (no dip in brightness, no sliding). The colour is the app's brand colour:
-every pixel of a small copy of its artwork is grouped by hue, the hue that covers the most of the artwork
-wins, and the real pixels in that group are averaged. It is kept as found, only lifted when very dark;
-artwork with no colour (black, white, grey) gets a soft neutral light. It is worked out once per app.
+The focused app's own colour lights the background, like a lamp behind the TV: a wide, soft ellipse low behind
+the dock, strong enough that the background reads as the app's colour, and fading to a few percent by the clock
+and date, so the header stays crisp. It follows the
+focused app part of the way (60%, a quarter screen at most either side) and cross-fades to its colour, with no
+dip in brightness. The glow is drawn on a view twice the screen's width, so as it slides its edges never come
+into view; only the view's translation changes, so nothing is redrawn while it moves.
+
+The colour is the app's brand colour. Every pixel of a 32x32 copy of the banner is grouped into 24 hue groups,
+each scored with its three neighbours either side, so a logo in several close shades is not split up and a
+gradient banner (JioHotstar's blue to magenta) lands on its middle; the group that covers
+the most (from 0.4% of the artwork, so a small logo on black counts) wins, and its real pixels are averaged. If
+the banner has no colour at all, the app's icon is tried. The colour is kept as found and only lifted when very
+dark; artwork with no colour anywhere gets a soft neutral light. It is worked out once per app.
+
+Launcher settings opens as a dark layer over Home (92%), so Home stays a faint presence behind the page, and
+every choice has a solid fill so nothing shows through it.
 
 ### Backgrounds on a big screen
 

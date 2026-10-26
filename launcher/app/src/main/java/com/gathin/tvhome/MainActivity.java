@@ -1638,6 +1638,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         r.set(0, 0, card.getWidth(), card.getHeight());
         root.offsetDescendantRectToMyCoords(card, r);
         float pad = GlassView.PAD_DP * density;   // GlassView's room for the frame and its glow
+        followAmbient(r.exactCenterX());
         float scale = adapter.focusScale();
         float w = card.getWidth() * scale + 2 * pad;
         float h = card.getHeight() * scale + 2 * pad;
@@ -1937,6 +1938,42 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * over the screen is one texture. It is painted once in white and tinted with the app's colour,
      * so changing apps neither repaints it on the CPU (about 11 ms) nor uploads it again.
      */
+    private android.animation.ObjectAnimator ambientSlide;
+
+    /** Readable Home's default glow: drawn on a view twice the screen's width, so it can slide. */
+    private boolean followingGlow() {
+        return ambientGlow && !cinematic && !Config.GLOW_HORIZON.equals(glowStyle);
+    }
+
+    /**
+     * Lets the glow follow the focused tile, part of the way (60%), so the light moves with the choice instead
+     * of the whole background shifting. The glow view is twice the screen's width and starts half a screen to
+     * the left, and the slide is held within a quarter screen either way of that, so the view always covers
+     * the screen and its edges never come into view. Only the view's translation changes: the GPU moves the
+     * cached bitmap and nothing is redrawn.
+     */
+    private void followAmbient(float tileCenterX) {
+        if (!followingGlow() || root.getWidth() == 0) return;
+        int screen = root.getWidth();
+        ViewGroup.LayoutParams lp = ambient.getLayoutParams();
+        if (lp.width != screen * 2) {
+            lp.width = screen * 2;
+            ambient.setLayoutParams(lp);
+        }
+        float home = -screen / 2f;
+        float offset = Math.max(-screen * 0.25f, Math.min(screen * 0.25f, (tileCenterX - screen / 2f) * 0.6f));
+        float target = home + offset;
+        if (ambientSlide != null) ambientSlide.cancel();
+        if (!animations || reducedMotion || ambient.getAlpha() == 0f) {
+            ambient.setTranslationX(target);
+            return;
+        }
+        ambientSlide = android.animation.ObjectAnimator.ofFloat(ambient, View.TRANSLATION_X, target);
+        ambientSlide.setDuration(600);
+        ambientSlide.setInterpolator(new android.view.animation.DecelerateInterpolator(1.8f));
+        ambientSlide.start();
+    }
+
     private void setAmbient(int color) {
         if (color == ambientColor && ambient.getBackground() != null) return;
         ambientColor = color;
@@ -1973,15 +2010,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         Shader.TileMode.CLAMP));
             } else {
                 // Readable Home: the focused app's colour as light on the wall behind the TV. A wide ellipse
-                // centred low behind the dock, spanning the screen, at full strength there and gone before the
-                // clock and date, so the header stays crisp. It stays still; only its colour changes.
+                // centred low behind the dock, at full strength there and gone before the clock and date, so
+                // the header stays crisp. It follows the focused tile part of the way (followAmbient).
+                // Strong enough that the background reads as the app's colour, not a dark tint of it.
                 RadialGradient wash = new RadialGradient(
-                        w * 0.5f, h * 0.78f, h * 0.62f,
-                        new int[]{0x8CFFFFFF, 0x4DFFFFFF, 0x1AFFFFFF, 0x00FFFFFF},
-                        new float[]{0f, 0.35f, 0.7f, 1f},
+                        w * 0.5f, h * 0.82f, h * 0.86f,
+                        new int[]{0xE0FFFFFF, 0xB0FFFFFF, 0x6BFFFFFF, 0x24FFFFFF, 0x00FFFFFF},
+                        new float[]{0f, 0.3f, 0.58f, 0.82f, 1f},
                         Shader.TileMode.CLAMP);
+                // The view is two screens wide (followAmbient), so this bitmap spans two screens: the ellipse is
+                // about a screen and a half across on screen and fades out before the bitmap's sides.
                 android.graphics.Matrix wide = new android.graphics.Matrix();
-                wide.setScale(1.38f, 1f, w * 0.5f, h * 0.78f);   // a soft ellipse that fades to nothing inside the bitmap, so no edge shows when it slides
+                wide.setScale(0.92f, 1f, w * 0.5f, h * 0.82f);   // the larger radius, kept inside the double-width bitmap
                 wash.setLocalMatrix(wide);
                 paint.setShader(wash);
             }

@@ -658,7 +658,23 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (position < 0 || position >= items.size()) return 0xFF444444;
         Entry e = items.get(position);
         if (e.ambient == 0) {
-            e.ambient = uniformTiles && e.banner == null ? dominantColor(e.icon) : vividColor(e.banner != null ? e.banner : e.icon);
+            if (uniformTiles && e.banner == null) {
+                e.ambient = dominantColor(e.icon);
+            } else {
+                int c = brandColor(e.banner != null ? e.banner : e.icon);
+                if (c == 0 && e.banner != null) {
+                    // A banner with no colour of its own (white or black artwork): the app's icon often has it.
+                    Drawable icon = e.icon;
+                    if (icon == null && e.component != null) {
+                        try {
+                            icon = ctx.getPackageManager().getActivityIcon(e.component);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    c = brandColor(icon);
+                }
+                e.ambient = c != 0 ? glowColor(c) : 0xFF9A9AA2;   // still none: a quiet neutral light
+            }
         }
         return e.ambient;
     }
@@ -668,7 +684,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     /**
      * The colour covering most of an icon, for a card that should read as that app: a small saturated badge
-     * (a red "new" corner on a blue icon) must not win, as it can with {@link #vividColor}. Grey if none.
+     * (a red "new" corner on a blue icon) must not win, as it can with {@link #brandColor}. Grey if none.
      */
     private static int dominantColor(Drawable live) {
         if (live == null) return 0xFF6E6E73;
@@ -808,18 +824,66 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     /**
-     * The app's own brand colour, for the glow behind Home. Every pixel of a 24x24 copy of the artwork is
-     * grouped by hue; the hue that covers the most of the artwork (weighted by how coloured each pixel is)
-     * wins, and the result is the average of the real pixels in that group, so it is the app's colour as drawn,
-     * not one stray pixel. It is kept as found; only a very dark colour is lifted enough to show as light.
-     * Artwork with no colour (black, white, grey) gets a soft neutral glow instead of an invented hue.
+     * The app's own brand colour, for the glow behind Home, or 0 when the artwork has none. Every pixel of a
+     * 32x32 copy is grouped into 24 hue groups; each group is scored together with its neighbours, so a logo drawn
+     * in several close shades is not split up, and a colour counts from 0.4% of the artwork (a small logo on black or white). The result is
+     * the average of the real pixels in the winning group, so it is the app's colour as drawn.
      */
-    private static int vividColor(Drawable live) {
-        int brand = dominantColor(live);
-        if (brand == 0xFF6E6E73) return 0xFF9A9AA2;   // monochrome artwork: a quiet neutral light
+    static int brandColor(Drawable live) {
+        if (live == null) return 0;
+        Drawable d = live.getConstantState() != null ? live.getConstantState().newDrawable().mutate() : live;
+        Rect saved = new Rect(d.getBounds());
+        int n = 32, bins = 24;
+        Bitmap bmp = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888);
+        d.setBounds(0, 0, n, n);
+        d.draw(new Canvas(bmp));
+        d.setBounds(saved);
+        int[] px = new int[n * n];
+        bmp.getPixels(px, 0, n, 0, 0, n, n);
+        bmp.recycle();
+        float[] weight = new float[bins];
+        float[][] sum = new float[bins][3];
+        float[] hsv = new float[3];
+        for (int p : px) {
+            if (Color.alpha(p) < 128) continue;
+            Color.colorToHSV(p, hsv);
+            if (hsv[1] < 0.25f || hsv[2] < 0.2f) continue;   // white, grey and black carry no hue
+            int bin = (int) (hsv[0] / (360f / bins)) % bins;
+            float w = hsv[1] * hsv[1] * Math.min(1f, hsv[2] * 1.3f);   // the more coloured, the more it counts
+            weight[bin] += w;
+            sum[bin][0] += Color.red(p) * w;
+            sum[bin][1] += Color.green(p) * w;
+            sum[bin][2] += Color.blue(p) * w;
+        }
+        // Each hue is scored with three groups either side (a 105 degree window), so a gradient banner (blue to
+        // magenta) lands on its middle, while a single-colour brand keeps its own colour.
+        int best = -1, win = 3;
+        float bestScore = 0f;
+        for (int i = 0; i < bins; i++) {
+            float score = 0f;
+            for (int k = -win; k <= win; k++) score += weight[(i + k + bins) % bins];
+            if (score > bestScore) {
+                bestScore = score;
+                best = i;
+            }
+        }
+        if (best < 0 || bestScore < n * n * 0.004f) return 0;   // a small logo counts; a few stray pixels do not
+        float w = 0, r = 0, g = 0, b = 0;
+        for (int k = -win; k <= win; k++) {
+            int i = (best + k + bins) % bins;
+            w += weight[i];
+            r += sum[i][0];
+            g += sum[i][1];
+            b += sum[i][2];
+        }
+        return Color.rgb(Math.round(r / w), Math.round(g / w), Math.round(b / w));
+    }
+
+    /** The brand colour as light: kept as found, only lifted when very dark so it shows on black. */
+    private static int glowColor(int brand) {
         float[] hsv = new float[3];
         Color.colorToHSV(brand, hsv);
-        hsv[2] = Math.max(hsv[2], 0.45f);
+        hsv[2] = Math.max(hsv[2], 0.55f);
         return Color.HSVToColor(hsv);
     }
 

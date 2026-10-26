@@ -304,7 +304,15 @@ def other_app(tv):
         "cmd package resolve-activity --brief -a android.intent.action.MAIN "
         "-c android.intent.category.LAUNCHER")
     lines = [line.strip() for line in out.splitlines() if "/" in line]
-    tv._other_app = lines[-1] if lines else None
+    found = lines[-1] if lines else None
+    if found is None or found.startswith("android/"):
+        # Several apps answer LAUNCHER on most TVs, so Android names its own chooser
+        # (android/com.android.internal.app.ResolverActivity). Started directly, the chooser has nothing to
+        # offer and shows "No apps can perform this action" on every run; ask for the Settings app instead.
+        out = tv.shell("cmd package resolve-activity --brief -a android.settings.SETTINGS")
+        lines = [line.strip() for line in out.splitlines() if "/" in line and not line.strip().startswith("android/")]
+        found = lines[-1] if lines else None
+    tv._other_app = found
     return tv._other_app
 
 
