@@ -1,9 +1,42 @@
-> **This branch is Readable Home**, a restyle of the launcher for easy reading from the sofa: one typeface
-> (Inter) on a five-size type scale, an 8dp spacing grid with concentric corners, a glass focus frame and a
-> slim two-line top bar, and a Launcher settings page with a live sketch of Home. Tested on a Xiaomi
-> MiTV-AXSO2. The screenshots below are from this branch. How to use it, what every setting does, and what
-> changed and why: [docs/readable-home](docs/readable-home/README.md). Everything else is upstream
-> [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv).
+# Readable Home
+
+**A TV home screen anyone in the family can read from the sofa.** This is a fork of
+[CleanYourTV](https://github.com/Gathin23/cleanyourtv), which takes the ads and bloat off an Android TV or
+Google TV. Readable Home keeps all of that and restyles the home screen so it is calm, large and clear.
+
+| Before | After |
+|---|---|
+| ![The reference launcher](docs/readable-home/before.jpg) | ![Readable Home](docs/readable-home/after.jpg) |
+
+**Who it helps:** parents and grandparents, anyone with tired or weaker eyes, and anyone who would rather
+not squint at small spaced-out capitals across a room.
+
+- **One clear font, no stretched letters.** Five text sizes, nothing tiny, and names in plain sentence case.
+- **Always know where you are.** A white glass frame with a soft glow sits around the app you are on, and
+  only that app shows its name, so the screen stays quiet.
+- **Calm, even spacing.** Everything lines up on one 8dp grid with matching rounded corners.
+- **Settings you can see before you change them.** A sketch of Home on the settings page shows each choice
+  before you press OK, and the choices that could make Home look broken are left off.
+- **Everything else from CleanYourTV still works:** the debloat, themes, module cards, the app library, the
+  Inputs menu and the remote buttons. It follows CleanYourTV's main project, merged in regularly.
+
+### Install in three steps
+
+1. On the TV: **Settings → Device Preferences → About**, press OK on **Build** seven times, then turn on
+   **Developer options → USB debugging**.
+2. On a Mac or PC on the same Wi-Fi, open Claude Code (or another coding assistant) and paste:
+   `Set up https://github.com/itismowgli/cleanyourtv (branch readable-home) on my TV at <tv ip>: follow
+   PROMPT.md to debloat it, then install this branch's launcher.`
+3. Accept "Allow USB debugging?" on the TV and answer its few questions. Turn USB debugging off at the end.
+
+Prefer doing it by hand? See [the guide](docs/readable-home/README.md): what is on Home, every setting with a
+picture of what it does, and what changed. Tested on a Xiaomi MiTV-AXSO2 (Android TV 9). It is the main project's
+launcher underneath, so it should work on the TVs the main project supports; reports from other TVs are
+welcome as issues.
+
+---
+
+*Everything below is CleanYourTV's own README, which applies to this fork too.*
 
 <p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads. Strip the bloatware from any Android TV or Google TV over Wi-Fi and replace the ad-filled home screen with a clean launcher that looks like an Apple TV. No root, no cable, nothing uninstalled, and a one-line restore." width="800"></a>
