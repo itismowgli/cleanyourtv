@@ -280,6 +280,13 @@ tiles a little under the width limit but never under the floor. All launcher uni
 no errors, and the Python suite passes. Two `test_device_notes_index` cases failed on macOS on upstream `main` too; the
 fix is on this branch and in upstream PR #924.
 
+Every push to `readable-home` and every pull request runs the same checks as upstream's `main`: the Python
+suite, the README table check, the launcher's unit tests, lint, release build and APK size gate
+(`.github/workflows/ci.yml`). Pull requests are also reviewed against `AGENTS.md` and this guide
+(`.github/workflows/claude-review.yml`): automatically for a branch of this repo, and on a `@claude review`
+comment from the owner for a pull request from another fork. The review only comments; it never pushes,
+approves or merges.
+
 ## Screenshots
 
 Every screenshot is new, taken on the Xiaomi MiTV-AXSO2 with this build and the Wi-Fi network name painted
