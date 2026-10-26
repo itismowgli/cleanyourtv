@@ -20,6 +20,37 @@ not squint at small spaced-out capitals across a room.
 - **Everything else from CleanYourTV still works:** the debloat, themes, module cards, the app library, the
   Inputs menu and the remote buttons. It follows CleanYourTV's main project, merged in regularly.
 
+### How it differs from CleanYourTV's launcher
+
+Same debloat, same tools, same launcher code underneath. What changes is how Home reads and feels:
+
+| | CleanYourTV launcher (3.0) | Readable Home |
+|---|---|---|
+| Font | Outfit | Inter, drawn for reading on screens |
+| Text sizes | 14 different sizes, the smallest 10sp | 5 sizes, the smallest 13sp |
+| Letter spacing | Stretched in 36 places, many labels in capitals | None, and names in sentence case |
+| App names | The focused app's name in large type above the dock | The name under the app you are on, where your eyes already are, which gives the rows more room |
+| Where you are | A glass slab over the tile | A white glass frame with a soft glow around it |
+| Background | A glow tinted from the app's artwork, fixed in one place, dimming between dock apps | The app's brand colour (red for Netflix, blue for Prime Video), stronger, following you along the row and fading straight from one colour to the next |
+| Spacing | Mixed values | One 8dp grid, with corners that match |
+| Launcher settings | A list of options | Each choice shown on a small sketch of Home before you press OK, on a page with Home's own glow |
+
+Speed, measured with `tools/bench.py --keys 36 --series 3` on the same TV (Xiaomi MiTV-AXSO2, Android TV 9):
+
+| | CleanYourTV launcher (3.0) | Readable Home |
+|---|---|---|
+| Focus moves and settles | 636 ms | **436 ms** |
+| Janky frames | 2 of 4,094 | **0** of 2,799 |
+| Key response (p50 / p95) | 19 / 26.5 ms | 19 / 25.7 ms |
+| Cold start (median of 10) | 692 ms | 704 ms |
+| Back to Home (p50) | 57 ms | 58 ms |
+| Launcher CPU when idle | 0.1% | 0.1% |
+| APK size | 535,561 bytes | 535,221 bytes |
+
+So focus moves settle about a third faster with no dropped frames, and the rest is level. Memory depends on what
+has been on screen: 22 against 24 MB at the end of the benchmark, 34 against 19 MB just after a fresh start.
+These numbers come from one TV; results from other TVs are welcome.
+
 ### Install in three steps
 
 1. On the TV: **Settings → Device Preferences → About**, press OK on **Build** seven times, then turn on

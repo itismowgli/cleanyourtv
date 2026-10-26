@@ -1803,18 +1803,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroArt.forceHasOverlappingRendering(false);
         if (scrimPercent <= 0) return;   // cinematic_scrim 0: no scrim at all
         View scrim = findViewById(R.id.heroScrim);
-        Drawable shade = scrimDrawable();
+        BitmapDrawable shade = scrimDrawable();
         // On the bitmap's paint, not the view: a view's alpha would draw the full screen through an offscreen buffer.
         shade.setAlpha(scrimPercent * 255 / 100);
         scrim.setBackground(shade);
         scrim.setVisibility(View.VISIBLE);
+        addGrainLater(shade.getBitmap(), grained -> {
+            if (scrim.getBackground() != shade) return;
+            BitmapDrawable g = new BitmapDrawable(getResources(), grained);
+            g.setGravity(Gravity.FILL);
+            g.setAlpha(scrimPercent * 255 / 100);
+            scrim.setBackground(g);
+        });
     }
 
     /**
      * Darkens the side the shelf's text is on and the lower part of the screen, so the name, the dock and
      * the grid stay readable over the artwork. One small bitmap stretched over the screen, like the glow.
      */
-    private Drawable scrimDrawable() {
+    private BitmapDrawable scrimDrawable() {
         int w = 480, h = 270;   // with a grain, like the glow, so the dark gradient does not band
         Bitmap bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp);
@@ -1827,7 +1834,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 new int[]{0x00060406, 0x00060406, 0xDB060406, 0xFF060406}, new float[]{0f, 0.28f, 0.58f, 0.76f},
                 Shader.TileMode.CLAMP));
         canvas.drawRect(0, 0, w, h, paint);
-        addGrain(bmp);
         BitmapDrawable scrim = new BitmapDrawable(getResources(), bmp);
         scrim.setGravity(Gravity.FILL);
         return scrim;
@@ -1838,6 +1844,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * gradient as wide flat bands, which a big TV and its picture processing make look blotchy; the grain breaks
      * the band edges up and is too small to see. Run once when the mask is built, never per frame.
      */
+    /**
+     * Adds the grain to a copy of the mask on a background thread and hands the copy back on the main thread.
+     * On a 1 GB TV the grain takes about 45 ms, which at start-up delayed Home's first frame; the mask shows
+     * without it until then, and a change of one alpha step is not visible.
+     */
+    private void addGrainLater(Bitmap bmp, java.util.function.Consumer<Bitmap> done) {
+        Bitmap copy = bmp.copy(Bitmap.Config.ARGB_8888, true);
+        if (copy == null) return;
+        new Thread(() -> {
+            addGrain(copy);
+            root.post(() -> {
+                if (!isDestroyed()) done.accept(copy);
+            });
+        }, "grain").start();
+    }
+
     private static void addGrain(Bitmap bmp) {
         int w = bmp.getWidth(), h = bmp.getHeight();
         int[] px = new int[w * h];
@@ -2031,10 +2053,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 paint.setShader(wash);
             }
             canvas.drawRect(0, 0, w, h, paint);
-            addGrain(bmp);
             glow = new BitmapDrawable(getResources(), bmp);
             glow.setGravity(Gravity.FILL);
             ambient.setBackground(glow);
+            final BitmapDrawable plain = glow;
+            addGrainLater(bmp, grained -> {
+                if (ambient.getBackground() != plain) return;
+                BitmapDrawable g = new BitmapDrawable(getResources(), grained);
+                g.setGravity(Gravity.FILL);
+                g.setTint(0xFF000000 | ambientColor);
+                ambient.setBackground(g);
+            });
         }
         // The default tint mode, SRC_IN, keeps the mask's alpha and takes the colour from the tint.
         glow.setTint(0xFF000000 | color);

@@ -211,8 +211,7 @@ and moving along the dock cross-fades it from one colour to the next instead of 
 
 ### Backgrounds on a big screen
 
-The glow behind the apps is a 480x270 mask stretched 4x. A one-step grain is now added once when it is
-built, so an 8-bit panel shows a fade instead of flat bands: the average flat run along a row went from 18px
+The glow behind the apps is a 480x270 mask stretched 4x. A one-step grain is added once, on a background thread, so an 8-bit panel shows a fade instead of flat bands: the average flat run along a row went from 18px
 to 7px. (A 960x540 mask got it to 4px, but cost memory and start-up time, so the mask stays at 480x270.)
 The cinematic shelf's scrim gets the same grain.
 
@@ -243,17 +242,30 @@ name when focus moves on.
 
 ## Size and performance
 
-The release APK is 481,119 bytes, against 481,243 for the reference launcher at the same upstream commit,
-under the repo's 491,520-byte size gate. `tools/bench.py --keys 36 --series 3` on the TV:
+Measured on a Xiaomi MiTV-AXSO2 (Android TV 9) against CleanYourTV's launcher 3.0 at the same upstream commit,
+with `tools/bench.py --keys 36 --series 3` and, for the cold start, ten `am start -W` runs per build:
 
-| | Key response p50 / p95 | Janky frames | Cold start | Memory (PSS) |
-|---|---|---|---|---|
-| Reference launcher (`main`) | 23 / 32 ms | 0.02% | 652 ms | 19 MB |
-| This branch | 23 / 32 ms | 0.7% (15 of 2,151) | 693 ms | 38 MB |
+| | Reference launcher (3.0) | This branch |
+|---|---|---|
+| APK size | 535,561 bytes | 535,221 bytes (size gate 589,824) |
+| Key response p50 / p95 | 19 / 26.5 ms | 19 / 25.7 ms |
+| Focus moves and settles (p50) | 636 ms | 436 ms |
+| Janky frames | 2 of 4,094 | 0 of 2,799 |
+| Cold start, median of 10 | 692 ms | 704 ms |
+| Back to Home, p50 | 57 ms | 58 ms |
+| Launcher CPU when idle | 0.1% | 0.1% |
+| Memory (PSS) at the end of the benchmark | 22 MB | 24 MB |
+| Memory (PSS) just after a fresh start, median of 5 | 34 MB | 19 MB |
 
-Where the extra memory goes has not been traced yet. An earlier version with 960x540 glow masks and xxhdpi
-banners used 41 MB and started in 905 ms, so both were taken back out. There are no new views on the hot
-path and no blur.
+The grain that keeps the glow from banding (see Backgrounds on a big screen) took 45 ms on the main thread at
+start-up, the whole gap to the reference launcher. It is now added on a background thread: the glow shows at
+once and the grained copy replaces it a moment later, a change of one alpha step that cannot be seen. That
+took the cold start from 735 to 704 ms.
+
+`bench.py` reported a few returns to Home over a second. In ten further runs on the same TV they took 52 to
+67 ms: the slow ones came while the Settings app the benchmark switches from was being restarted.
+An earlier version with 960x540 glow masks and xxhdpi banners used 41 MB and started in 905 ms, so both were
+taken back out. There are no new views on the hot path and no blur.
 
 ## Tests
 
