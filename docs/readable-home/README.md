@@ -168,7 +168,7 @@ The big app name above the dock is off (`dock_title`), and the dock sits 48dp un
 at the bottom of the screen, so a full second row of apps shows on Home.
 
 Rows scrolling up are still cut at the grid's edge, as in the reference launcher. A fading edge there was
-tried and measured with `tools/bench.py --keys 36 --series 3`: janky frames went from 1 in 2,819 (0.04%) to
+tried and measured with `tools/venv/bin/python -I tools/bench.py --keys 36 --series 3`: janky frames went from 1 in 2,819 (0.04%) to
 400 in 2,805 (14.3%) and the median key response from 23 to 31 ms, so it is not in this branch.
 
 ### Menus, library and screensaver
@@ -244,7 +244,7 @@ name when focus moves on.
 ## Size and performance
 
 Measured on a Xiaomi MiTV-AXSO2 (Android TV 9) against CleanYourTV's launcher 3.0 at the same upstream commit,
-with `tools/bench.py --keys 36 --series 3` and, for the cold start, ten `am start -W` runs per build:
+with `tools/venv/bin/python -I tools/bench.py --keys 36 --series 3` and, for the cold start, ten `am start -W` runs per build:
 
 | | Reference launcher (3.0) | This branch |
 |---|---|---|
