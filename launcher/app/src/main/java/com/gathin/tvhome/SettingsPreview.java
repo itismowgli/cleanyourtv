@@ -65,10 +65,9 @@ public class SettingsPreview extends View {
         r.set(0, 0, getWidth(), getHeight());
         fill.setShader(null);
         fill.setColor(0xFF000000);
-        canvas.drawRoundRect(r, 16 * getResources().getDisplayMetrics().density,
-                16 * getResources().getDisplayMetrics().density, fill);
+        float corner = getResources().getDimension(R.dimen.corner_surface);
+        canvas.drawRoundRect(r, corner, corner, fill);
         android.graphics.Path clip = new android.graphics.Path();
-        float corner = 16 * getResources().getDisplayMetrics().density;
         clip.addRoundRect(r, corner, corner, android.graphics.Path.Direction.CW);
         canvas.clipPath(clip);
         canvas.scale(k, k);

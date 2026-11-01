@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/glass_panel"
-    android:padding="8dp"
+    android:padding="@dimen/panel_padding"
     android:elevation="12dp">
 
     <LinearLayout

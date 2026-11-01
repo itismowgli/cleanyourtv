@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Readable Home's corner radii. Use these names, never a loose number.
+     - Bigger surfaces get bigger radii: a row or tile 16dp, a panel around rows 24dp.
+     - Nested shapes are concentric: outer radius = inner radius + the gap between them. A panel's 8dp
+       padding is corner_panel - corner_surface, so its rows' corners run parallel to its own.
+     - When the gap is as big as the outer radius (a dialog's 24dp padding), the child keeps its own radius.
+     - Siblings match: every tile, row and choice is corner_surface; every pill is corner_pill.
+     - A pill is half its height, so it stays fully round. -->
+<resources>
+    <dimen name="corner_small">8dp</dimen>     <!-- badges and checks inside a 16dp surface -->
+    <dimen name="corner_surface">16dp</dimen>  <!-- tiles at the design width, menu rows, settings choices -->
+    <dimen name="corner_panel">24dp</dimen>    <!-- menus and dialogs: corner_surface + 8dp padding -->
+    <dimen name="corner_pill">18dp</dimen>     <!-- the 36dp top-bar pills -->
+    <dimen name="panel_padding">8dp</dimen>    <!-- corner_panel - corner_surface -->
+</resources>

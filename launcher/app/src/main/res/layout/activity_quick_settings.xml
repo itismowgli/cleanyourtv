@@ -16,7 +16,7 @@
         android:layout_marginEnd="56dp"
         android:orientation="vertical"
         android:background="@drawable/glass_panel"
-        android:padding="6dp"
+        android:padding="@dimen/panel_padding"
         android:elevation="12dp">
 
         <LinearLayout

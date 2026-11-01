@@ -129,10 +129,10 @@ final class AppLibraryDialog {
         highlight.setAlpha(1f);
     }
 
-    private GradientDrawable surface(int color, int radius) {
+    private GradientDrawable surface(int color, float radiusPx) {
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(color);
-        bg.setCornerRadius(dp(radius));
+        bg.setCornerRadius(radiusPx);
         return bg;
     }
 
@@ -161,7 +161,9 @@ final class AppLibraryDialog {
         panel = new LinearLayout(activity);
         panel.setLayoutDirection(rtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(12), dp(8), dp(12), dp(12));
+        // corner_panel - corner_surface: the rows' and cards' corners run parallel to the panel's (corners.xml).
+        int pad = activity.getResources().getDimensionPixelSize(R.dimen.panel_padding);
+        panel.setPadding(pad, pad, pad, pad);
         panel.setBackgroundResource(R.drawable.glass_panel);
         View decor = activity.getWindow().getDecorView();
         catalogWidth = Math.min(dp(800), Math.max(dp(200), decor.getWidth() - dp(64)));
@@ -401,7 +403,8 @@ final class AppLibraryDialog {
         list.setAdapter(new Catalog());
         shelf.addView(list, new FrameLayout.LayoutParams(-1, -1));
         highlight = new GlassView(activity, null);
-        highlight.setRadius(dp(16));   // same as the cards, so the frame's corners run parallel to theirs
+        // The cards' radius: the frame adds its 4dp of glass on top, so its corners run parallel to theirs.
+        highlight.setRadius(activity.getResources().getDimension(R.dimen.corner_surface));
         highlight.setInset(dp(6));     // the shelf is tight: the frame plus a hint of glow
         highlight.setAlpha(0f);
         highlight.setFocusable(false);
@@ -654,12 +657,13 @@ final class AppLibraryDialog {
             boolean recent = !selectionMode && LibraryApps.recent(installTimes.getOrDefault(pkg, 0L), catalogTime);
             status.setText(home ? R.string.library_on_home : recent ? R.string.library_recent : R.string.library_add_home);
             status.setVisibility(home || !okOpens ? View.VISIBLE : View.INVISIBLE);
-            holder.itemView.setBackground(surface(home ? 0x1475BBA4 : 0x0CFFFFFF, 16));   // the focus frame's radius
+            holder.itemView.setBackground(surface(home ? 0x1475BBA4 : 0x0CFFFFFF,
+                    activity.getResources().getDimension(R.dimen.corner_surface)));   // the focus frame's radius
             View check = holder.itemView.findViewById(R.id.dot);
             check.getLayoutParams().width = dp(home ? 18 : 8);
             check.getLayoutParams().height = dp(home ? 18 : 8);
             if (home) check.setBackgroundResource(R.drawable.library_check);
-            else check.setBackground(surface(0xFF70D9A0, 8));
+            else check.setBackground(surface(0xFF70D9A0, dp(4)));   // a dot: half its 8dp size
             check.setVisibility(home || recent ? View.VISIBLE : View.GONE);
             holder.itemView.setOnClickListener(v -> {
                 boolean onHomeNow = onHome.test(pkg);
