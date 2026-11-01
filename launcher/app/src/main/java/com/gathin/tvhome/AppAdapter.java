@@ -110,9 +110,16 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         int design = Math.round(DESIGN_W_DP * density);
         if (innerWidthPx <= 0 || columns <= 0) return design;
         int cell = innerWidthPx / columns;
+        // A fixed GAP_DP between tiles, the same as the dock band's padding, at any number of columns.
+        int byGap = cell - Math.round(GAP_DP * density);
         int fit = (int) ((cell - 12 * density) / FOCUS_SCALE);
-        return Math.max(Math.round(80 * density), Math.min(design, fit));
+        return Math.max(Math.round(80 * density), Math.min(design, Math.min(byGap, fit)));
     }
+
+    /** Space between two tiles, and the dock band's padding around them (Readable Home's one spacing step). */
+    static final float GAP_DP = 32;
+    /** The grid's least side padding: tiles then sit GAP_DP in, so the band's edge is on the 56dp content edge. */
+    static final float GRID_SIDE_DP = 16;
 
     static int tileHeightPx(int tileWidthPx) {
         return Math.round(tileWidthPx * DESIGN_H_DP / DESIGN_W_DP);
@@ -136,10 +143,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static final float COMPACT_ITEM_EXTRA_DP = 8 + 8 + 24 + 8;
     static final float COMPACT_BOTTOM_ROOM_DP = 16;
 
-    /** item_app.xml: 16dp padding above and below, an 8dp gap and the 24dp name label under the tile. */
-    static final float ITEM_EXTRA_DP = 16 + 8 + 24 + 16;
-    /** DockDecoration's offsets above and below the dock row. */
-    static final float DOCK_EXTRA_DP = 8 + 20;
+    /**
+     * item_app.xml: nothing above the tile; under it an 8dp gap, the 24dp name and 16dp, so the name has room
+     * and the next row starts 48dp under this one (GAP_DP + 16).
+     */
+    static final float ITEM_EXTRA_DP = 0 + 8 + 24 + 16;
+    /** DockDecoration's offsets: GAP_DP of band above the dock tiles, and GAP_DP between the band and the next row. */
+    static final float DOCK_EXTRA_DP = 32 + 32;
     /** Room kept under the last row rows_below_dock asks for (MainActivity places the dock with the same). */
     static final float BOTTOM_ROOM_DP = 32;
     /** Room kept above the dock for the dock title (48sp hero name, about 58dp, plus a 30dp gap) when dock_title

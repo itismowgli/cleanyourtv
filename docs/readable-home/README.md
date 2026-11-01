@@ -130,18 +130,29 @@ a module card's "Weather · Forecast …", scrolls once, as on Android TV.
 | Element | Rule | dp |
 |---|---|---|
 | Content edge (top bar, dock edge) | 7 × 8 | 56 |
-| Gap between tiles, across and down | 4 × 8 | 32 |
-| Dock padding, all four sides (was 14 top, 22 sides) | 3 × 8 | 24 |
-| Tile (16:9) | 4w + 3 × 32 = 800 − 2 × 24 | 176 × 99 |
-| Tile corner | 2 × 8 | 16 |
-| Dock corner, concentric | 16 + 24 | 40 |
-| Buttons | height 36, radius = height / 2 | 36 / 18 |
-| Inputs menu | rows 16 + padding 8 | 24 |
+| Gap between tiles, at any number of columns | 4 × 8 | 32 |
+| Dock padding, top and sides | 4 × 8, the same as the gap | 32 |
+| Under a tile: 8 gap, 24 name, 16 | 6 × 8 | 48 |
+| Row to row, and the dock's bottom padding | the name's room | 48 |
+| Dock band to the next row | 4 × 8 | 32 |
+| Tile (16:9) at 4 per row | a column less the 32dp gap | 172 × 97 |
+| Tile corner | `corner_surface` | 16 |
+| Dock corner, concentric | 16 + 32 | 48 |
+| Buttons | height 36, radius = height / 2, `corner_pill` | 36 / 18 |
+| Menus and dialogs | rows 16 + padding 8, `corner_panel` | 24 |
 | Icons (top bar, Quick settings, app library) | | 20 |
 
-Nested rounded shapes use concentric corners (outer radius = inner radius + the padding between them), so
-their curves run parallel. The top bar, the dock edge and the last button share the same left and right
-lines.
+The gap between tiles is fixed and the tile takes what is left of its column, so 4, 5 or 6 per row keep the
+same 32dp gap. When tiles shrink to fit the rows below the dock, the columns close up and the grid is centred
+instead of the gaps opening.
+
+Corner radii have names in `res/values/corners.xml` (8, 16, 24 and the 18dp pill), never loose numbers. Bigger
+surfaces get bigger radii; siblings share one radius. Nested rounded shapes use concentric corners (outer
+radius = inner radius + the gap between them), so their curves run parallel: a menu panel's 8dp padding is
+its 24dp corner less its rows' 16dp. A badge inside a tile keeps its own round shape. A tile's radius shrinks
+with the tile, so a small tile keeps its shape instead of turning into a pill. Menus shown in their own popup
+window cast no shadow: the window cut the shadow off square, which showed as dark corners outside the
+rounded ones. The top bar, the dock edge and the last button share the same left and right lines.
 
 ### Focus
 

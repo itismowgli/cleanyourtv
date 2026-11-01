@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/glass_panel"
-    android:padding="24dp"
-    android:elevation="12dp">
+    android:padding="24dp">
 
     <TextView
         android:id="@+id/title"

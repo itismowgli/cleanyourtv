@@ -51,7 +51,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         this.singleRow = singleRow;
         this.bandAll = singleRow && bandAll;
         this.density = density;
-        this.namesRoom = names ? 28 * density : 0;   // 8dp gap + 24dp name, less ~4dp of the line box under the text
+        // The name (8dp gap + 24dp) fills the band's 32dp bottom padding; 16dp more keeps it off the band's edge.
+        this.namesRoom = names ? 16 * density : 0;
         this.lightGlass = lightGlass;
         this.evenPadding = evenPadding;
         this.bandVisible = bandVisible;
@@ -80,8 +81,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
                                @NonNull RecyclerView.State state) {
         int pos = parent.getChildAdapterPosition(view);
         if (pos >= 0 && (singleRow || pos < dockSize)) {
-            outRect.top = (int) (8 * density);      // band reaches 24dp above the tile: 16dp item padding + 8
-            outRect.bottom = (int) (20 * density);  // leaves exactly one 32dp tile gap under the band
+            outRect.top = Math.round(AppAdapter.GAP_DP * density);     // the band's 32dp above the tile
+            outRect.bottom = Math.round(AppAdapter.GAP_DP * density);  // one 32dp gap between the band and the next row
         }
     }
 
@@ -110,12 +111,12 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             }
         }
         if (!any) return;
-        // One padding on all four sides (3 x 8dp) and a concentric corner: band radius = tile radius + padding.
-        // Tiles sit 24dp in from the grid's edges (8dp grid padding + 16dp half gap), so the band's outer edge
-        // lands on the 56dp content edge shared with the clock and the top buttons. The band may not draw
-        // outside the grid, so the sides are clamped to the room there is (#454). Readable Home always uses this
-        // even padding, so dock_even_padding has nothing left to change here.
-        float pad = 24 * density;
+        // The gap between the tiles (32dp) as padding on every side, and a concentric corner: band radius = tile
+        // radius + padding. Tiles sit 32dp in from the grid's edges (16dp grid padding + 16dp half gap), so the
+        // band's outer edge lands on the 56dp content edge shared with the clock and the top buttons. The band may
+        // not draw outside the grid, so the sides are clamped to the room there is (#454). Readable Home always
+        // uses this even padding, so dock_even_padding has nothing left to change here.
+        float pad = AppAdapter.GAP_DP * density;
         float side = Math.max(0f, Math.min(pad, Math.min(rect.left, parent.getWidth() - rect.right)));
         rect.inset(singleRow ? -pad : -side, -pad);
         float radius = AppAdapter.cornerRadius(cardWidth, density) + pad;

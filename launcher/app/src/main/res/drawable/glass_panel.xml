@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Menus and dialogs: one opaque rounded shape. A plain shape, not a layer-list: the panels cast a shadow
-     (elevation), and Android takes the shadow's outline from this drawable, so it must be the rounded shape
-     itself or the shadow shows square corners past the rounded ones. -->
+<!-- Menus and dialogs: one opaque rounded shape. A plain shape, so a shadow takes its rounded outline.
+     Panels shown in a popup window of their own size cast no shadow (no elevation in popup_inputs,
+     popup_cards and dialog_card_prompt): the window clips the shadow to its rectangle, which left a square
+     dark corner outside each rounded one. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <gradient android:angle="270" android:startColor="#FF262629" android:endColor="#FF161618" />
     <corners android:radius="@dimen/corner_panel" />

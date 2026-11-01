@@ -677,8 +677,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             int h = b - t;
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
-            int inner = (r - l) - grid.getPaddingLeft() - grid.getPaddingRight();
+            int minSide = Math.round(AppAdapter.GRID_SIDE_DP * density);
+            int inner = (r - l) - (MainActivity.this.dockRow && !singleRow ? 2 * minSide
+                    : grid.getPaddingLeft() + grid.getPaddingRight());
             int tileW = AppAdapter.tileWidthPx(inner, h, COLUMNS, rowsBelowDock, cfg.dockTitle, cfg.dockRow, density);
+            if (MainActivity.this.dockRow && !singleRow) {
+                // Tiles shrunk to fit the rows keep the 32dp gap: the columns close up and the grid is centred,
+                // instead of the spare width opening the gaps between the tiles.
+                int side = Math.max(minSide, ((r - l) - COLUMNS * (tileW + Math.round(AppAdapter.GAP_DP * density))) / 2);
+                if (grid.getPaddingLeft() != side || grid.getPaddingRight() != side)
+                    grid.setPadding(side, grid.getPaddingTop(), side, grid.getPaddingBottom());
+            }
             int itemH = AppAdapter.itemHeightPx(AppAdapter.tileHeightPx(tileW), density);
             int dockRow = itemH + (int) (AppAdapter.DOCK_EXTRA_DP * density);   // item height plus DockDecoration offsets
             int gridRows = itemH * rowsBelowDock;
@@ -697,8 +706,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // No dock to push down: the grid starts at the top, with room for the first row's zoom and glass.
             if (!MainActivity.this.dockRow) want = (int) (AppAdapter.TOP_ROOM_DP * density);
             // A single row never shows the names under its tiles (the title above the row names the app), so the
-            // 7dp gap and 22dp label item_app.xml keeps for them would only lift the row: sit it that much lower.
-            if (singleRow && !cfg.alwaysShowNames) want += (int) (29 * density);
+            // 8dp gap and 24dp label item_app.xml keeps for them would only lift the row: sit it that much lower.
+            if (singleRow && !cfg.alwaysShowNames) want += (int) (32 * density);
             if (grid.getPaddingTop() != want) {
                 grid.setPadding(grid.getPaddingLeft(), want, grid.getPaddingRight(), grid.getPaddingBottom());
                 // A vertical grid parks the dock on the new padding line by scrolling (onTileFocused); a sideways
@@ -1823,7 +1832,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (dockRow && (singleRow || position < COLUMNS)) {
             // Dock: park it at the bottom of the screen and show the top shelf for this app. In a single row
             // every tile is in the dock's row, which never scrolls vertically.
-            int decoratedTop = item.getTop() - (int) (8 * density);   // DockDecoration outRect.top
+            int decoratedTop = item.getTop() - Math.round(AppAdapter.GAP_DP * density);   // DockDecoration outRect.top
             int dy = decoratedTop - grid.getPaddingTop();
             // A 1px mismatch used to start a scroll on every dock move. Only scroll when the row is
             // actually off; reduced motion does it in one jump so it does not fight the highlight.

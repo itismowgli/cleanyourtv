@@ -98,23 +98,24 @@ public class SettingsPreview extends View {
         }
 
         // The grid, sized the way the launcher sizes it.
-        float inner = SCREEN_W - 2 * (56 + 8);
+        float gap = AppAdapter.GAP_DP;
+        float inner = SCREEN_W - 2 * (56 + AppAdapter.GRID_SIDE_DP);
         float gridH = SCREEN_H - 90;
         int tileW = AppAdapter.tileWidthPx(Math.round(inner), Math.round(gridH), columns, rows, false, true, 1f);
         int tileH = AppAdapter.tileHeightPx(tileW);
         float tileR = AppAdapter.cornerRadius(tileW, 1f);
-        float cell = inner / columns;
-        float left = 64;
+        float cell = tileW + gap;   // a fixed 32dp gap, the columns centred, as MainActivity lays them out
+        float left = (SCREEN_W - cell * columns) / 2f;
 
-        // Dock band, 24dp around the tiles with room for the focused name: 48dp under the top bar when rows show
-        // below it, near the bottom of the screen when none do, as MainActivity places it.
-        float bandH = 24 + tileH + 8 + 24 + 16;
+        // Dock band: 32dp around the tiles, and 16dp more under them for the focused name. 48dp under the top bar
+        // when rows show below it, near the bottom of the screen when none do, as MainActivity places it.
+        float bandH = gap + tileH + gap + 16;
         float bandTop = rows > 0 ? 80 + 48 : SCREEN_H - 50 - bandH;   // at 0 the next row peeks in below
-        float tileTop = bandTop + 24;
+        float tileTop = bandTop + gap;
         float bandBottom = bandTop + bandH;
         fill.setColor(Math.round(dockOpacity * 2.55f) << 24 | 0x141416);
-        r.set(56, bandTop, SCREEN_W - 56, bandBottom);
-        canvas.drawRoundRect(r, tileR + 24, tileR + 24, fill);
+        r.set(left + gap / 2f - gap, bandTop, SCREEN_W - left - gap / 2f + gap, bandBottom);
+        canvas.drawRoundRect(r, tileR + gap, tileR + gap, fill);
         for (int c = 0; c < columns; c++) {
             float cx = left + cell * c + (cell - tileW) / 2f;
             fill.setColor(TILE_COLORS[c % TILE_COLORS.length]);
@@ -137,7 +138,7 @@ public class SettingsPreview extends View {
                 r.set(cx, rowTop, cx + tileW, rowTop + tileH);
                 canvas.drawRoundRect(r, tileR, tileR, fill);
             }
-            rowTop += tileH + 8 + 24 + 32;
+            rowTop += tileH + 8 + 24 + 16;   // 48dp between rows: the name's 32dp and 16dp
         }
         canvas.restore();
     }
