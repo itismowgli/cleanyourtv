@@ -35,6 +35,8 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] rowChoices = new TextView[3];
     private static final int[] DOCK_OPACITIES = {100, 70, 50};
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
+    private static final String[] CLOCK_FORMATS = {"system", "12", "24"};
+    private final TextView[] clockChoices = new TextView[CLOCK_FORMATS.length];
     private TextView wallpaperChoice;
     private TextView animationsChoice;
     private SettingsPreview preview;
@@ -43,6 +45,7 @@ public final class LauncherSettingsActivity extends Activity {
     private int columns;
     private int rowsBelowDock;
     private int dockOpacity;
+    private String clockFormat;
     private boolean animations;
     private boolean advancedEffects;
     private boolean themeWallpaper;
@@ -74,6 +77,7 @@ public final class LauncherSettingsActivity extends Activity {
         columns = config.columns;
         rowsBelowDock = config.rowsBelowDock;
         dockOpacity = config.dockOpacity;
+        clockFormat = config.clockFormat;
         animations = config.animations;
         advancedEffects = config.animations && config.advancedEffects;
         themeWallpaper = config.wallpaperEnabled && !config.wallpapers.isEmpty();
@@ -114,6 +118,18 @@ public final class LauncherSettingsActivity extends Activity {
                 refresh();
             });
         }
+        int[] clockIds = {R.id.clockSystem, R.id.clock12, R.id.clock24};
+        for (int i = 0; i < clockIds.length; i++) {
+            final String value = CLOCK_FORMATS[i];
+            clockChoices[i] = findViewById(clockIds[i]);
+            clockChoices[i].setOnClickListener(v -> {
+                if (value.equals(clockFormat)) return;
+                clockFormat = value;
+                choices.edit().putString(Config.CLOCK_FORMAT_KEY, value).apply();
+                changed();
+                refresh();
+            });
+        }
         // Mirror text alignment without globally opting the launcher into RTL. Numeric rows
         // still need explicit ordering in Android's no-supportsRtl compatibility mode.
         if (getResources().getBoolean(R.bool.rtl_menu_bar))
@@ -122,6 +138,7 @@ public final class LauncherSettingsActivity extends Activity {
             reverseRow(columnChoices);
             reverseRow(rowChoices);
             reverseRow(dockChoices);
+            reverseRow(clockChoices);
         }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
@@ -155,20 +172,19 @@ public final class LauncherSettingsActivity extends Activity {
             if (!hasOnTvChoices()) return;
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
-                    .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY).commit();
+                    .remove(Config.DOCK_OPACITY_KEY).remove(Config.CLOCK_FORMAT_KEY).remove(OpenOnStart.KEY).commit();
             Config current = Config.load(this);
             columns = current.columns;
             rowsBelowDock = current.rowsBelowDock;
             dockOpacity = current.dockOpacity;
+            clockFormat = current.clockFormat;
             animations = current.animations;
             advancedEffects = current.animations && current.advancedEffects;
             changed();
             refresh();
         });
-        findViewById(R.id.defaultHomeChoice).setOnClickListener(v -> {
-            Toast.makeText(this, R.string.home_settings_help, Toast.LENGTH_LONG).show();
-            open(new Intent(Settings.ACTION_HOME_SETTINGS));
-        });
+        findViewById(R.id.defaultHomeChoice).setOnClickListener(v ->
+                open(new Intent(this, HomeSettingsActivity.class)));
         findViewById(R.id.tvSettingsChoice).setOnClickListener(v ->
                 open(SystemSettings.intent(this, Settings.ACTION_SETTINGS)));
         preview = findViewById(R.id.preview);
@@ -309,6 +325,9 @@ public final class LauncherSettingsActivity extends Activity {
         for (int i = 0; i < dockChoices.length; i++) {
             dockChoices[i].setSelected(dockOpacity == DOCK_OPACITIES[i]);
         }
+        for (int i = 0; i < clockChoices.length; i++) {
+            clockChoices[i].setSelected(CLOCK_FORMATS[i].equals(clockFormat));
+        }
         animationsChoice.setText(getString(R.string.animations_state,
                 getString(animations ? R.string.on : R.string.off)));
         String wallpaperCurrent = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
@@ -325,7 +344,7 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(OpenOnStart.KEY);
+                || choices.contains(Config.CLOCK_FORMAT_KEY) || choices.contains(OpenOnStart.KEY);
     }
 
     private void open(Intent intent) {

@@ -49,6 +49,20 @@ join it again in Settings before you disable the wizard.
 TV_HOST=<tv-ip> tools/restore.sh examples/tcl-q7c-google-tv/debloat.txt com.google.android.apps.tv.launcherx
 ```
 
+## Why the Home key takes `pm disable-user` and nothing else
+
+Confirmed again on the zh-TW unit of this board. Four other routes were tried on a live set and do not work on
+this firmware:
+
+| Route | Result |
+|---|---|
+| `cmd package set-home-activity --user 0 <component>` | Prints `Success`, but nothing changes: `resolve-activity` still returns the old launcher and no preferred activity is recorded. A no-op on this build. |
+| `android:priority` on the HOME `<intent-filter>` | Ignored for third-party apps. The installed APK was pulled back and verified to carry `priority="2"`, then `"1000"`; the package manager still reported `priority=0` and kept resolving to `setupwraith`. |
+| `cmd role add-role-holder android.app.role.HOME <pkg>` | Succeeds — `dumpsys role` shows `holders=<pkg>` — but HOME resolution ignores it. |
+| `pm disable-user <setupwraith>/<...>.RecoveryActivity` | Refused: `SecurityException: Shell cannot change component state for ...` |
+
+The last one is why the whole `setupwraith` package has to go, and why the Wi-Fi-owner check above matters.
+
 ## Remote buttons
 
 Every button on this remote arrives as scancode 240 (`KEY_UNKNOWN`). TCL's `TclKeyLayoutMap` tells them apart by HID
@@ -583,3 +597,20 @@ com.tcl.ttvs/.tcast.core.stringinput.SoftKeyboard
   - disney plus (only opened, no account)
 
 > prime video & disney plus apps opened fine, i do not claim that playback works
+
+## Eighth unit: 65Q7CX1 (Italy, Wi-Fi)
+
+Same build: `G08_4K_GB`, Android 14, `UTT2.250416.001 AU02`. Set up on 28-29 October 2026. The launcher first ran
+with `stock_home_redirect`, then launcherx and setupwraith were disabled so Google TV no longer flashes at power-on.
+
+- **Chromecast works with setupwraith and launcherx disabled**, after a reboot too: logcat has `Cast.Auth.OK=1` and
+  6/6 `CastV2.Authenticate.Challenge.In`/`Response.Out`, no `No private key`. The Cast receiver signs with
+  `jni_client_auth_creds_mediadrm`, so on this build its key does not come from setupwraith (unlike Google's own
+  Chromecast hardware). The Wi-Fi network belonged to setupwraith: it was forgotten and rejoined first.
+- **Home held** opened Google TV's notification panel, which is launcherx's
+  (`.dashboard.DashboardHandler` answers `TOGGLE_NOTIFICATION_HANDLER_PANEL`). With launcherx disabled nothing opens it,
+  and Settings has no notification screen. `app_keys` `3:home` and `hold:3:com.gathin.tvhome/.QuickSettingsActivity`
+  put the launcher's quick panel there instead.
+- **TCL Channel** (4020) → `4020:com.tcl.tv` opens Live TV. Settings (gear) needs `settings_key_keycodes` `[83]`.
+- **Not looked into:** there is no recents screen (`KEYCODE_APP_SWITCH` does nothing), and the mic answers "Google
+  Assistant is having trouble processing your request", already with launcherx enabled.
